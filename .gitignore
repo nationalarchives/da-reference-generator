@@ -2,3 +2,10 @@
 .bsp
 
 target/
+
+*.tfstate
+*.tfstate.backup
+*.tfstate.lock.info
+*.tfvars
+*.backup
+terraform/.terraform*
