@@ -1,39 +1,46 @@
-# Introduction
-This repository is a [template repository](https://docs.github.com/en/repositories/creating-and-managing-repositories/creating-a-repository-from-a-template).
+# DA Reference Generator
 
-When you want to create a new DA repository, you should do so by using this template.  Hint: click the green button above that says "Use this template".
+Repository containing code for a self-contained service to generate unique "piece references" for records transferred to The National Archives (TNA).
 
-# Why
-We want to ensure that all repositories in DA follow defined conventions and standards. See [The Engineering Handbook](https://national-archives.atlassian.net/wiki/spaces/DAAE/pages/47775767/Engineering+Handbook).
+The service consists of three main components:
+* *Lambda function*: the Lambda generates the "piece references" based on a incremented counter;
+* *DynamoDb Table*: the table contains the counter to generate the unique "piece references";
+* *API Gateway*: Provides access to the service from other AWS services and external clients outside of AWS.
 
-Specifically, this mandates that all repositories implement at least these minimal set of [pre-commit](https://pre-commit.com/) hooks and a pre-commit check.  Update these as you see fit - if you need to.
+## Lambda
 
-It is therefore required that you use [pre-commit](https://pre-commit.com/) and the [detect secrets](https://github.com/Yelp/detect-secrets) tool/hook.
+[TODO]
 
-They can generally be installed with pip. e.g.
+## DynamoDb Table
 
-```
-pip install pre-commit
-pip install detect-secrets
-```
+[TODO]
 
-You will need to initialise pre-commit after cloning the newly created repository by running:
+## API Gateway
 
-```pre-commit install```
+[TODO]
 
-# Contents
-```README.md``` - Change this as appropriate.
+## Deployment
 
-```CHANGELOG.md``` - A [Keep a change log](https://keepachangelog.com/en/1.0.0/) changelog.
+Deployment process of the service will depend on the hosting environment.
 
-```LICENSE``` - A MIT License dated 2023 Crown Copyright.
+GitHub Actions workflow files should be prefixed with the hosting environment, eg `tdr_`
 
-```.pre-commit-config.yaml``` - Sensible defaults to get you started.  Add the hooks you need accordingly.
+### Current Hosting Environment: TDR
 
-```.secrets.baseline``` - A baseline file for detect-secrets that assumes there should be no secrets in this repository.
+The service is currently hosted on [Transfer Digital Records (TDR)](https://github.com/nationalarchives/tdr-dev-documentation)
 
-```.github/workflows/pre_commit.yml``` - A workflow which runs pre-commit on a pull request to main, as a check.
+#### Repository and environment secrets
 
-# Protect Main Branch
-Creating a repo from the template will not set branch protection.
-See [The Engineering Handbook](https://national-archives.atlassian.net/wiki/spaces/DAAE/pages/47775767/Engineering+Handbook) for guidance.
+These are set in the [tdr-terraform-github](https://github.com/nationalarchives/tdr-terraform-github) repository
+
+* `MANAGEMENT_ACCOUNT`: AWS account number for the TDR management (mgmt) account.
+* `WORKFLOW_PAT`: GitHub access token for TDR
+* `SLACK_WEBHOOK`: TDR slack webhook
+
+### Terraform
+
+[TODO]
+
+### Lambda Code
+
+[TODO]
