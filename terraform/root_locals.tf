@@ -1,12 +1,13 @@
 locals {
-  environment = lower(terraform.workspace)
-  common_tags = tomap(
+  hosting_environment = lower(terraform.workspace)
+  hosting_assume_role = module.terraform_config_hosting_project.terraform_config[local.hosting_environment]["terraform_account_role"]
+  hosting_common_tags = tomap(
     {
-      "Environment"     = local.environment,
+      "Environment"     = local.hosting_environment,
       "Owner"           = "digital archiving",
       "Terraform"       = true,
       "TerraformSource" = "https://github.com/nationalarchives/da-reference-generator",
-      "CostCentre"      = "56"
+      "CostCentre"      = module.terraform_config_hosting_project.terraform_config["cost_centre"]
       "Role"            = "prvt"
     }
   )

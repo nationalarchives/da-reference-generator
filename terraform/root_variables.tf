@@ -3,7 +3,12 @@ variable "project" {
   default     = "da"
 }
 
-variable "account_number" {
-  description = "The AWS account number where the service is hosted is hosted"
+variable "hosting_project" {
+  description = "abbreviation for the project hosting the service, eg tdr"
+  default     = "tdr"
+}
+
+variable "hosting_account_number" {
+  description = "The AWS account number where the service is hosted"
   type        = string
 }
