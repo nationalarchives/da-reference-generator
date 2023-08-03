@@ -14,6 +14,7 @@ jobs:
     uses: nationalarchives/tdr-github-actions/.github/workflows/terraform_check.yml@main
     with:
       terraform-version: '1.5.0'
+      working-directory: terraform
     secrets:
       MANAGEMENT_ACCOUNT: ${{ secrets.TDR_MANAGEMENT_ACCOUNT }}
       WORKFLOW_PAT: ${{ secrets.TDR_WORKFLOW_PAT }}
