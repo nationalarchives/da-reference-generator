@@ -8,4 +8,4 @@ target/
 *.tfstate.lock.info
 *.tfvars
 *.backup
-terraform/.terraform*
+.terraform
