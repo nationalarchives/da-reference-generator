@@ -11,6 +11,5 @@ locals {
       "Role"            = "prvt"
     }
   )
-  dynamodb_leading_key = "filePieceCounter"
-  dynamodb_hash_key    = "v1"
+  dynamodb_hash_key = "v1"
 }
