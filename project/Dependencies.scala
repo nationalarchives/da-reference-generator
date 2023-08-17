@@ -4,6 +4,7 @@ object Dependencies {
   private val circeVersion = "0.14.5"
 
   lazy val scalaTest = "org.scalatest" %% "scalatest" % "3.2.16"
+  lazy val mockito = "org.scalatestplus" %% "mockito-4-11" % "3.2.16.0"
   lazy val awsSdkDynamoDb = "software.amazon.awssdk" % "dynamodb" % "2.20.110"
   lazy val ocitools = "uk.gov.nationalarchives.oci" % "oci-tools-scala_2.13" % "0.3.0"
   lazy val slf4j = "org.slf4j" % "slf4j-simple" % "2.0.7"
