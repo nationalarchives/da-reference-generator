@@ -1,6 +1,16 @@
-import sbt.*
+import sbt._
 
 object Dependencies {
+  private val circeVersion = "0.14.5"
+
   lazy val scalaTest = "org.scalatest" %% "scalatest" % "3.2.16"
   lazy val awsSdkDynamoDb = "software.amazon.awssdk" % "dynamodb" % "2.20.110"
+  lazy val ocitools = "uk.gov.nationalarchives.oci" % "oci-tools-scala_2.13" % "0.3.0"
+  lazy val slf4j = "org.slf4j" % "slf4j-simple" % "2.0.7"
+  lazy val circeCore = "io.circe" %% "circe-core" % circeVersion
+  lazy val circeGeneric = "io.circe" %% "circe-generic" % circeVersion
+  lazy val circeParser = "io.circe" %% "circe-parser" % circeVersion
+  lazy val scalaLogging = "com.typesafe.scala-logging" %% "scala-logging" % "3.9.5"
+  lazy val logback = "ch.qos.logback" % "logback-classic" % "1.4.11"
+  lazy val logstash = "net.logstash.logback" % "logstash-logback-encoder" % "7.4"
 }

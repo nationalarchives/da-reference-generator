@@ -11,5 +11,12 @@ lazy val root = (project in file("."))
 
 libraryDependencies ++= Seq(
   awsSdkDynamoDb,
-  scalaTest % Test
+  scalaTest % Test,
+  ocitools,
+  circeCore,
+  circeGeneric,
+  circeParser,
+  scalaLogging,
+  logback,
+  logstash
 )
