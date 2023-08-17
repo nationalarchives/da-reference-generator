@@ -12,12 +12,8 @@ import java.util
 import scala.jdk.CollectionConverters.{MapHasAsJava, MapHasAsScala}
 import scala.util.Try
 
-class DynamoDb {
+class DynamoDb(ddb: DynamoDbClient) {
   val logger: Logger = Logger[DynamoDb]
-  val ddb: DynamoDbClient = DynamoDbClient.builder()
-    .credentialsProvider(DefaultCredentialsProvider.create())
-    .region(Region.EU_WEST_2)
-    .build()
   val tableName = "da-reference-counter"
   val key: String = "v1"
   val keyVal: String = "filePieceCounter"
@@ -29,7 +25,7 @@ class DynamoDb {
     .tableName(tableName)
     .build()
 
-  def getItem: Try[String] = {
+  def getCount: Try[String] = {
     Try {
       val returnedItem: Map[String, AttributeValue] = ddb.getItem(request).item.asScala.toMap
       if (returnedItem.nonEmpty) {
@@ -42,14 +38,14 @@ class DynamoDb {
     }
   }
 
-  def updateTableItem(currentCounter: String, increment: Int): Try[String] = {
+  def getReferences(currentCounter: String, numberOfReferences: Int): Try[String] = {
     val request: UpdateItemRequest = UpdateItemRequest.builder()
       .tableName(tableName)
       .key(keyToGet)
       .updateExpression(s"ADD $pieceCounter :incr")
       .conditionExpression(s"$pieceCounter = :currCounter AND :incr > :zero")
       .expressionAttributeValues(Map(
-        ":incr" -> AttributeValue.builder().n(increment.toString).build(),
+        ":incr" -> AttributeValue.builder().n(numberOfReferences.toString).build(),
         ":currCounter" -> AttributeValue.builder().n(currentCounter).build(),
         ":zero" -> AttributeValue.builder().n("0").build()
       ).asJava)
@@ -58,8 +54,8 @@ class DynamoDb {
 
     Try {
       val response = ddb.updateItem(request)
-      val encryptedReferences = generateReferences(currentCounter.toInt, increment).asJson.noSpaces
-      logger.info(s"The counter has been updated by $increment")
+      val encryptedReferences = generateReferences(currentCounter.toInt, numberOfReferences).asJson.noSpaces
+      logger.info(s"The counter has been updated by $numberOfReferences")
       logger.info(s"The current counter is now ${response.attributes().get(pieceCounter).n()}")
       encryptedReferences
     }
