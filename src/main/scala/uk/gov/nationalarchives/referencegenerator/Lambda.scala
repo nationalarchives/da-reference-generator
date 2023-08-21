@@ -2,6 +2,7 @@ package uk.gov.nationalarchives.referencegenerator
 
 import com.amazonaws.services.lambda.runtime.events.{APIGatewayProxyRequestEvent, APIGatewayProxyResponseEvent}
 import com.amazonaws.services.lambda.runtime.{Context, RequestHandler}
+import com.typesafe.config.{Config, ConfigFactory}
 import com.typesafe.scalalogging.Logger
 import software.amazon.awssdk.auth.credentials.DefaultCredentialsProvider
 import software.amazon.awssdk.regions.Region
@@ -14,8 +15,10 @@ class Lambda extends RequestHandler[APIGatewayProxyRequestEvent, APIGatewayProxy
   val logger: Logger = Logger[Lambda]
 
   override def handleRequest(event: APIGatewayProxyRequestEvent, context: Context): APIGatewayProxyResponseEvent = {
+    val config: Config = ConfigFactory.load()
     val queryParams = event.getQueryStringParameters
-    val numberOfRefs = queryParams.get("numberofrefs").toInt
+    val queryParam: String = config.getString("queryParam")
+    val numberOfRefs = queryParams.get(queryParam).toInt
 
     val client: DynamoDbClient = DynamoDbClient.builder()
       .credentialsProvider(DefaultCredentialsProvider.create())
@@ -27,8 +30,8 @@ class Lambda extends RequestHandler[APIGatewayProxyRequestEvent, APIGatewayProxy
 
   def process(input: Input, client: DynamoDbClient): APIGatewayProxyResponseEvent = {
     val dynamoDb = new DynamoDb(client)
-    val getItem = dynamoDb.getCount
-    val getReferences = getItem.flatMap(currentCount => dynamoDb.getReferences(currentCount, input.numberOfReferences))
+    val getCurrentCount = dynamoDb.getCount
+    val getReferences = getCurrentCount.flatMap(currentCount => dynamoDb.getReferences(currentCount, input.numberOfReferences))
     val response = new APIGatewayProxyResponseEvent()
     getReferences match {
       case Success(encryptedReferences) =>

@@ -1,4 +1,5 @@
 package uk.gov.nationalarchives.referencegenerator
+
 import uk.gov.nationalarchives.oci.Alphabet.Alphabet
 import uk.gov.nationalarchives.oci.{Alphabet, BaseCoder, IncludedAlphabet}
 
@@ -12,9 +13,5 @@ object Base25Encoder {
   def encode(counter: Long): String = {
     val alphabetIndices = BaseCoder.encode(counter, baseNumber)
     Alphabet.toString(alphabet, alphabetIndices)
-  }
-
-  def decodeCounter(value: String): BigInt = {
-    BaseCoder.decode(value, baseNumber, character => { return alphabet.indexOf(character) })
   }
 }

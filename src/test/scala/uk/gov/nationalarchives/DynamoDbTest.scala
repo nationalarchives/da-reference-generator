@@ -1,10 +1,12 @@
+package uk.gov.nationalarchives
+
 import org.mockito.ArgumentMatchers.any
 import org.mockito.Mockito.when
 import org.scalatest.flatspec.AnyFlatSpec
 import org.scalatest.matchers.should.Matchers
 import org.scalatestplus.mockito.MockitoSugar.mock
 import software.amazon.awssdk.services.dynamodb.DynamoDbClient
-import software.amazon.awssdk.services.dynamodb.model.{AttributeValue, DynamoDbException, GetItemRequest, GetItemResponse, ResourceNotFoundException, UpdateItemRequest, UpdateItemResponse}
+import software.amazon.awssdk.services.dynamodb.model._
 import uk.gov.nationalarchives.referencegenerator.DynamoDb
 
 import scala.jdk.CollectionConverters.MapHasAsJava
@@ -48,7 +50,7 @@ class DynamoDbTest extends AnyFlatSpec with Matchers {
     val dynamoDb = new DynamoDb(mockDDB)
     val encryptedReferences = dynamoDb.getReferences("10", 2)
 
-    encryptedReferences shouldBe Success("""[{"reference":"N"},{"reference":"P"}]""")
+    encryptedReferences shouldBe Success("""["N","P"]""")
   }
 
   "getReferences" should "throw an exception if updateItem fails" in {

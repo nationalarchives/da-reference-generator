@@ -1,9 +1,8 @@
 package uk.gov.nationalarchives.referencegenerator
 
+import com.typesafe.config.{Config, ConfigFactory}
 import com.typesafe.scalalogging.Logger
 import io.circe.syntax._
-import software.amazon.awssdk.auth.credentials.DefaultCredentialsProvider
-import software.amazon.awssdk.regions.Region
 import software.amazon.awssdk.services.dynamodb.DynamoDbClient
 import software.amazon.awssdk.services.dynamodb.model.{AttributeValue, GetItemRequest, ReturnValue, UpdateItemRequest}
 import uk.gov.nationalarchives.referencegenerator.Reference._
@@ -14,10 +13,12 @@ import scala.util.Try
 
 class DynamoDb(ddb: DynamoDbClient) {
   val logger: Logger = Logger[DynamoDb]
-  val tableName = "da-reference-counter"
-  val key: String = "v1"
-  val keyVal: String = "filePieceCounter"
-  val pieceCounter = "pieceCounter"
+  val config: Config = ConfigFactory.load()
+
+  val tableName: String = config.getString("tableName")
+  val key: String = config.getString("key")
+  val keyVal: String = config.getString("keyVal")
+  val pieceCounter: String = config.getString("pieceCounter")
   val keyToGet: util.Map[String, AttributeValue] = Map(key -> AttributeValue.builder().s(keyVal).build()).asJava
 
   val request: GetItemRequest = GetItemRequest.builder()
@@ -61,7 +62,7 @@ class DynamoDb(ddb: DynamoDbClient) {
     }
   }
 
-  private def generateReferences(currentCount: Int, count: Int): List[EncryptedReference] = {
-    (currentCount until currentCount + count).map(cc => EncryptedReference(Base25Encoder.encode(cc.toLong))).toList
+  private def generateReferences(currentCount: Int, count: Int): List[String] = {
+    (currentCount until currentCount + count).map(cc => EncryptedReference(Base25Encoder.encode(cc.toLong)).reference).toList
   }
 }

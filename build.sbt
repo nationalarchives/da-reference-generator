@@ -21,5 +21,6 @@ libraryDependencies ++= Seq(
   circeParser,
   scalaLogging,
   logback,
-  logstash
+  logstash,
+  typesafe
 )

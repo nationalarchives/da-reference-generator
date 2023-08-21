@@ -1,3 +1,5 @@
+package uk.gov.nationalarchives
+
 import com.amazonaws.services.lambda.runtime.events.APIGatewayProxyResponseEvent
 import org.mockito.ArgumentMatchers.any
 import org.mockito.Mockito.when
@@ -14,7 +16,7 @@ class LambdaTest extends AnyFlatSpec with Matchers {
 
   "The Lambda class" should "successfully process a request with the correct number of references" in {
     val mockDDB = mock[DynamoDbClient]
-    val input = Lambda.Input(numberOfReferences = 1)
+    val input = Lambda.Input(numberOfReferences = 3)
     val lambda = new Lambda()
     val getItemMap = Map("pieceCounter" -> AttributeValue.builder().n("10").build()).asJava
     val getItemResponse = GetItemResponse.builder().item(getItemMap).build()
@@ -29,7 +31,7 @@ class LambdaTest extends AnyFlatSpec with Matchers {
     val actual: APIGatewayProxyResponseEvent = lambda.process(input, mockDDB)
     val expected: APIGatewayProxyResponseEvent = new APIGatewayProxyResponseEvent()
       .withStatusCode(200)
-      .withBody("[{\"reference\":\"N\"}]")
+      .withBody("""["N","P","Q"]""")
     actual shouldBe expected
   }
 
