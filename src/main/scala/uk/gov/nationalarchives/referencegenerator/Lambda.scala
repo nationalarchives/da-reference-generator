@@ -1,5 +1,7 @@
 package uk.gov.nationalarchives.referencegenerator
 
+import com.amazonaws.services.lambda.runtime.events.{APIGatewayProxyRequestEvent, APIGatewayProxyResponseEvent}
+import com.amazonaws.services.lambda.runtime.{Context, RequestHandler}
 import com.typesafe.scalalogging.Logger
 import software.amazon.awssdk.auth.credentials.DefaultCredentialsProvider
 import software.amazon.awssdk.regions.Region
@@ -8,22 +10,37 @@ import uk.gov.nationalarchives.referencegenerator.Lambda.Input
 
 import scala.util.{Failure, Success}
 
-class Lambda {
+class Lambda extends RequestHandler[APIGatewayProxyRequestEvent, APIGatewayProxyResponseEvent] {
   val logger: Logger = Logger[Lambda]
 
-  def process(input: Input): Unit = {
+  override def handleRequest(event: APIGatewayProxyRequestEvent, context: Context): APIGatewayProxyResponseEvent = {
+    val queryParams = event.getQueryStringParameters
+    val numberOfRefs = queryParams.get("numberofrefs").toInt
+
     val client: DynamoDbClient = DynamoDbClient.builder()
       .credentialsProvider(DefaultCredentialsProvider.create())
       .region(Region.EU_WEST_2)
       .build()
+
+    process(Input(numberOfRefs), client)
+  }
+
+  def process(input: Input, client: DynamoDbClient): APIGatewayProxyResponseEvent = {
     val dynamoDb = new DynamoDb(client)
-    dynamoDb.getCount match {
-      case Success(value) =>
-        dynamoDb.getReferences(value, input.numberOfReferences) match {
-          case Success(encryptedReferences) => logger.info(s"Generated the following references: $encryptedReferences")
-          case Failure(errorMsg) => logger.error(errorMsg.getMessage)
-        }
-      case Failure(errorMsg) => logger.error(errorMsg.getMessage)
+    val getItem = dynamoDb.getCount
+    val getReferences = getItem.flatMap(currentCount => dynamoDb.getReferences(currentCount, input.numberOfReferences))
+    val response = new APIGatewayProxyResponseEvent()
+    getReferences match {
+      case Success(encryptedReferences) =>
+        logger.info(s"Generated the following references: $encryptedReferences")
+        response.setStatusCode(200)
+        response.setBody(encryptedReferences)
+        response
+      case Failure(exception) =>
+        logger.error(exception.getMessage)
+        response.setStatusCode(500)
+        response.setBody(exception.getMessage)
+        response
     }
   }
 }
