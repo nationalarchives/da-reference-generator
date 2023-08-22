@@ -37,6 +37,24 @@ These are set in the [tdr-terraform-github](https://github.com/nationalarchives/
 * `WORKFLOW_PAT`: GitHub access token for TDR
 * `SLACK_WEBHOOK`: TDR slack webhook
 
+#### Seeding the Counter
+
+The reference counter in the DynamoDb table needs to be manually seeded before the table is encrypted.
+
+1. Create the DyanmoDb table using the Terraform but not adding the encryption
+2. Manually seed the counter in the table either via the AWS Cli or AWS Console:
+    ```
+   {
+     "v1": {
+         "S": "filePieceCounter"
+     },
+     "pieceCounter": {
+         "N": "0"
+     }
+   }
+   ```
+3. Add table encryption using the Terraform
+
 ### Terraform
 
 [TODO]
