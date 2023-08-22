@@ -7,34 +7,35 @@ import com.typesafe.scalalogging.Logger
 import software.amazon.awssdk.auth.credentials.DefaultCredentialsProvider
 import software.amazon.awssdk.regions.Region
 import software.amazon.awssdk.services.dynamodb.DynamoDbClient
-import uk.gov.nationalarchives.referencegenerator.Lambda.Input
+import uk.gov.nationalarchives.referencegenerator.Lambda.{EncryptedReference, Input}
+import io.circe.syntax._
 
 import scala.util.{Failure, Success}
 
 class Lambda extends RequestHandler[APIGatewayProxyRequestEvent, APIGatewayProxyResponseEvent] {
   val logger: Logger = Logger[Lambda]
+  val client: DynamoDbClient = DynamoDbClient.builder()
+    .credentialsProvider(DefaultCredentialsProvider.create())
+    .region(Region.EU_WEST_2)
+    .build()
 
   override def handleRequest(event: APIGatewayProxyRequestEvent, context: Context): APIGatewayProxyResponseEvent = {
     val config: Config = ConfigFactory.load()
     val queryParams = event.getQueryStringParameters
-    val queryParam: String = config.getString("queryParam")
+    val queryParam: String = config.getString("dynamodb.queryParam")
     val numberOfRefs = queryParams.get(queryParam).toInt
-
-    val client: DynamoDbClient = DynamoDbClient.builder()
-      .credentialsProvider(DefaultCredentialsProvider.create())
-      .region(Region.EU_WEST_2)
-      .build()
 
     process(Input(numberOfRefs), client)
   }
 
-  def process(input: Input, client: DynamoDbClient): APIGatewayProxyResponseEvent = {
-    val dynamoDb = new DynamoDb(client)
-    val getCurrentCount = dynamoDb.getCount
-    val getReferences = getCurrentCount.flatMap(currentCount => dynamoDb.getReferences(currentCount, input.numberOfReferences))
+  def process(input: Input, client: DynamoDbClient = client): APIGatewayProxyResponseEvent = {
+    val dynamoDb = new Counter(client)
+    val getCurrentCount = dynamoDb.currentCounter
+    val getReferences = getCurrentCount.flatMap(currentCount => dynamoDb.incrementCounter(currentCount, input.numberOfReferences))
     val response = new APIGatewayProxyResponseEvent()
     getReferences match {
-      case Success(encryptedReferences) =>
+      case Success((currentCounter, numberOfReferences)) =>
+        val encryptedReferences = generateReferences(currentCounter.toInt, numberOfReferences).asJson.noSpaces
         logger.info(s"Generated the following references: $encryptedReferences")
         response.setStatusCode(200)
         response.setBody(encryptedReferences)
@@ -46,8 +47,14 @@ class Lambda extends RequestHandler[APIGatewayProxyRequestEvent, APIGatewayProxy
         response
     }
   }
+
+  private def generateReferences(currentCount: Int, count: Int): List[String] = {
+    (currentCount until currentCount + count).map(cc => EncryptedReference(Base25Encoder.encode(cc.toLong)).reference).toList
+  }
 }
 
 object Lambda {
   case class Input(numberOfReferences: Int)
+
+  case class EncryptedReference(reference: String)
 }

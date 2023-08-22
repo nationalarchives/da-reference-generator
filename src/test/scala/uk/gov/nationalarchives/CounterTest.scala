@@ -7,39 +7,39 @@ import org.scalatest.matchers.should.Matchers
 import org.scalatestplus.mockito.MockitoSugar.mock
 import software.amazon.awssdk.services.dynamodb.DynamoDbClient
 import software.amazon.awssdk.services.dynamodb.model._
-import uk.gov.nationalarchives.referencegenerator.DynamoDb
+import uk.gov.nationalarchives.referencegenerator.Counter
 
 import scala.jdk.CollectionConverters.MapHasAsJava
 import scala.util.{Failure, Success}
 
-class DynamoDbTest extends AnyFlatSpec with Matchers {
+class CounterTest extends AnyFlatSpec with Matchers {
 
-  "getCount" should "return the current counter" in {
+  "currentCounter" should "return the current counter" in {
     val mockDDB = mock[DynamoDbClient]
     val item = Map("pieceCounter" -> AttributeValue.builder().n("10").build()).asJava
     val getItemResponse = GetItemResponse.builder().item(item).build()
 
     when(mockDDB.getItem(any[GetItemRequest])).thenReturn(getItemResponse)
 
-    val dynamoDb = new DynamoDb(mockDDB)
-    val currentCounter = dynamoDb.getCount
+    val dynamoDb = new Counter(mockDDB)
+    val currentCounter = dynamoDb.currentCounter
 
     currentCounter shouldBe Success("10")
   }
 
-  "getCount" should "throw an exception if no item is found" in {
+  "currentCounter" should "throw an exception if no item is found" in {
     val mockDDB = mock[DynamoDbClient]
     val noSuchElementException = new NoSuchElementException("No item found")
 
     when(mockDDB.getItem(any[GetItemRequest])).thenThrow(noSuchElementException)
 
-    val dynamoDb = new DynamoDb(mockDDB)
-    val caughtException = dynamoDb.getCount
+    val dynamoDb = new Counter(mockDDB)
+    val caughtException = dynamoDb.currentCounter
 
     caughtException shouldBe Failure(noSuchElementException)
   }
 
-  "getReferences" should "return the correct references" in {
+  "incrementCounter" should "return the currentCounter and numberOfReferences if updateItem succeeds" in {
     val mockDDB = mock[DynamoDbClient]
 
     val item = Map("pieceCounter" -> AttributeValue.builder().n("12").build()).asJava
@@ -47,20 +47,20 @@ class DynamoDbTest extends AnyFlatSpec with Matchers {
 
     when(mockDDB.updateItem(any[UpdateItemRequest])).thenReturn(updateItemResponse)
 
-    val dynamoDb = new DynamoDb(mockDDB)
-    val encryptedReferences = dynamoDb.getReferences("10", 2)
+    val dynamoDb = new Counter(mockDDB)
+    val encryptedReferences = dynamoDb.incrementCounter("10", 2)
 
-    encryptedReferences shouldBe Success("""["N","P"]""")
+    encryptedReferences shouldBe Success(("10", 2))
   }
 
-  "getReferences" should "throw an exception if updateItem fails" in {
+  "incrementCounter" should "throw an exception if updateItem fails" in {
     val mockDDB = mock[DynamoDbClient]
     val resourceNotFoundException = ResourceNotFoundException.builder().message("The increment cannot be zero").build()
 
     when(mockDDB.updateItem(any[UpdateItemRequest])).thenThrow(resourceNotFoundException)
 
-    val dynamoDb = new DynamoDb(mockDDB)
-    val caughtException = dynamoDb.getReferences("10", 0)
+    val dynamoDb = new Counter(mockDDB)
+    val caughtException = dynamoDb.incrementCounter("10", 0)
 
     caughtException shouldBe Failure(resourceNotFoundException)
   }
