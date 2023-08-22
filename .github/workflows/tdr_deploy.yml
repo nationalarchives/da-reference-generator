@@ -22,4 +22,3 @@ jobs:
       - run: gh workflow run tdr_deploy.yml -f environment=intg -f to-deploy=${{ needs.pre-deploy.outputs.next-version }}
         env:
           GITHUB_TOKEN: ${{ secrets.TDR_WORKFLOW_PAT }}
-
