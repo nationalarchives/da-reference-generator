@@ -29,39 +29,33 @@ class Counter(counterClient: DynamoDbClient) {
     ).asJava
   }
 
-  val request: GetItemRequest = GetItemRequest.builder()
+  val currentCountRequest: GetItemRequest = GetItemRequest.builder()
     .key(keyToGet)
     .tableName(tableName)
     .build()
 
-  def currentCounter: Try[String] = {
+
+  val incrementCounterRequest: (String, Int) => UpdateItemRequest = (currentCounter, numberOfReferences) => UpdateItemRequest.builder()
+    .tableName(tableName)
+    .key(keyToGet)
+    .updateExpression(updateExpression)
+    .conditionExpression(conditionExpression)
+    .expressionAttributeValues(createExpressionAttributeValues(currentCounter, numberOfReferences))
+    .returnValues(ReturnValue.ALL_NEW)
+    .build()
+
+  def incrementCounter(numberOfReferences: Int): Try[String] = {
     Try {
-      val returnedItem: Map[String, AttributeValue] = counterClient.getItem(request).item.asScala.toMap
-      if (returnedItem.nonEmpty) {
-        val keys = returnedItem
-        logger.info(s"The current counter is ${keys(pieceCounter).n()}")
-        keys(pieceCounter).n()
+      val currentCounterResponse: Map[String, AttributeValue] = counterClient.getItem(currentCountRequest).item.asScala.toMap
+
+      if (currentCounterResponse.nonEmpty) {
+        val currentCounter = currentCounterResponse(pieceCounter).n()
+        counterClient.updateItem(incrementCounterRequest(currentCounter, numberOfReferences))
+        logger.info(s"The counter value $currentCounter has been updated by $numberOfReferences")
+        currentCounter
       } else {
         throw new NoSuchElementException(s"No item found with the key: $key")
       }
-    }
-  }
-
-  def incrementCounter(currentCounter: String, numberOfReferences: Int): Try[(String, Int)] = {
-    val request: UpdateItemRequest = UpdateItemRequest.builder()
-      .tableName(tableName)
-      .key(keyToGet)
-      .updateExpression(updateExpression)
-      .conditionExpression(conditionExpression)
-      .expressionAttributeValues(createExpressionAttributeValues(currentCounter, numberOfReferences))
-      .returnValues(ReturnValue.ALL_NEW)
-      .build()
-
-    Try {
-      val response = counterClient.updateItem(request)
-      logger.info(s"The counter has been updated by $numberOfReferences")
-      logger.info(s"The current counter is now ${response.attributes().get(pieceCounter).n()}")
-      (currentCounter, numberOfReferences)
     }
   }
 }

@@ -29,13 +29,11 @@ class Lambda extends RequestHandler[APIGatewayProxyRequestEvent, APIGatewayProxy
   }
 
   def process(input: Input, client: DynamoDbClient = client): APIGatewayProxyResponseEvent = {
-    val dynamoDb = new Counter(client)
-    val getCurrentCount = dynamoDb.currentCounter
-    val getReferences = getCurrentCount.flatMap(currentCount => dynamoDb.incrementCounter(currentCount, input.numberOfReferences))
+    val counter = new Counter(client)
     val response = new APIGatewayProxyResponseEvent()
-    getReferences match {
-      case Success((currentCounter, numberOfReferences)) =>
-        val encryptedReferences = generateReferences(currentCounter.toInt, numberOfReferences).asJson.noSpaces
+    counter.incrementCounter(input.numberOfReferences) match {
+      case Success(currentCounter) =>
+        val encryptedReferences = generateReferences(currentCounter.toInt, input.numberOfReferences).asJson.noSpaces
         logger.info(s"Generated the following references: $encryptedReferences")
         response.setStatusCode(200)
         response.setBody(encryptedReferences)
