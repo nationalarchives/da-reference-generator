@@ -27,7 +27,7 @@ module "reference_generator_lambda" {
   source        = "./da-terraform-modules/lambda"
   function_name = local.reference_generator_function_name
   handler       = "uk.gov.nationalarchives.referencegenerator.Lambda::handleRequest"
-  policies = templatefile("${path.module}/templates/reference_generator_policy.json.tpl", {
+  policies = templatefile("${path.module}/templates/lambda/reference_generator_policy.json.tpl", {
     function_name = local.reference_generator_function_name
     account_id    = data.aws_caller_identity.current.account_id
     table_name    = local.reference_counter_table_name
