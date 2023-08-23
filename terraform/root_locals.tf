@@ -11,7 +11,7 @@ locals {
       "Role"            = "prvt"
     }
   )
-  dynamodb_hash_key                       = "v1"
+  dynamodb_hash_key                 = "v1"
   reference_generator_function_name = "${var.project}-reference-generator-${local.hosting_environment}"
-  reference_counter_table_name = "${var.project}-reference-counter"
+  reference_counter_table_name      = "${var.project}-reference-counter"
 }
