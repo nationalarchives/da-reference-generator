@@ -6,8 +6,7 @@ module "terraform_config_hosting_project" {
 module "dynamodb" {
   source                         = "./da-terraform-modules/dynamo"
   table_name                     = "${var.project}-reference-counter"
-  hash_key                       = local.dynamodb_hash_key
-  hash_key_type                  = "S"
+  hash_key                       = { type : "S", name : local.dynamodb_hash_key }
   deletion_protection_enabled    = true
   server_side_encryption_enabled = true
   kms_key_arn                    = module.dynamodb_kms_key.kms_key_arn
