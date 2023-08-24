@@ -17,7 +17,7 @@ module "dynamodb_kms_key" {
   key_name = "${var.project}-reference-counter-key-${local.hosting_environment}"
   tags     = local.hosting_common_tags
   default_policy_variables = {
-    user_roles    = []
+    user_roles    = [module.reference_generator_lambda.lambda_role_arn]
     ci_roles      = [local.hosting_assume_role]
     service_names = ["cloudwatch"]
   }
@@ -28,10 +28,11 @@ module "reference_generator_lambda" {
   function_name = local.reference_generator_function_name
   handler       = "uk.gov.nationalarchives.referencegenerator.Lambda::handleRequest"
   policies = {
-    "ReferenceGeneratorLambdaPolicy${title(local.hosting_environment)}" = templatefile("${path.module}/templates/lambda/reference_generator_policy.json.tpl", {
+    "${upper(var.project)}ReferenceGeneratorLambdaPolicy${title(local.hosting_environment)}" = templatefile("${path.module}/templates/lambda/reference_generator_policy.json.tpl", {
       function_name = local.reference_generator_function_name
       account_id    = data.aws_caller_identity.current.account_id
       table_name    = local.reference_counter_table_name
+      kms_key_arn    = module.dynamodb_kms_key.kms_key_arn
     })
   }
   runtime = "java11"

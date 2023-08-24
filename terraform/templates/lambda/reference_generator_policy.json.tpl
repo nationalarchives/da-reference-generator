@@ -4,7 +4,15 @@
     {
       "Effect": "Allow",
       "Action": [
-        "dynamodb:DeleteItem",
+        "kms:GenerateDataKey",
+        "kms:Decrypt",
+        "kms:Decrypt"
+      ],
+      "Resource": "${kms_key_arn}"
+    },
+    {
+      "Effect": "Allow",
+      "Action": [
         "dynamodb:GetItem",
         "dynamodb:PutItem",
         "dynamodb:Scan",
