@@ -32,7 +32,7 @@ module "reference_generator_lambda" {
       function_name = local.reference_generator_function_name
       account_id    = data.aws_caller_identity.current.account_id
       table_name    = local.reference_counter_table_name
-      kms_key_arn    = module.dynamodb_kms_key.kms_key_arn
+      kms_key_arn   = module.dynamodb_kms_key.kms_key_arn
     })
   }
   runtime = "java11"
