@@ -9,9 +9,8 @@ import java.util
 import scala.jdk.CollectionConverters.{MapHasAsJava, MapHasAsScala}
 import scala.util.Try
 
-class Counter(counterClient: DynamoDbClient) {
+class Counter(counterClient: DynamoDbClient, config: Config) {
   val logger: Logger = Logger[Counter]
-  val config: Config = ConfigFactory.load()
 
   val tableName: String = config.getString("dynamodb.tableName")
   val key: String = config.getString("dynamodb.key")
@@ -33,7 +32,6 @@ class Counter(counterClient: DynamoDbClient) {
     .key(keyToGet)
     .tableName(tableName)
     .build()
-
 
   val incrementCounterRequest: (String, Int) => UpdateItemRequest = (currentCounter, numberOfReferences) => UpdateItemRequest.builder()
     .tableName(tableName)

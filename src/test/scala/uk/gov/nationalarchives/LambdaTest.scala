@@ -1,6 +1,7 @@
 package uk.gov.nationalarchives
 
 import com.amazonaws.services.lambda.runtime.events.APIGatewayProxyResponseEvent
+import com.typesafe.config.{Config, ConfigFactory}
 import org.mockito.ArgumentMatchers.any
 import org.mockito.Mockito.when
 import org.scalatest.flatspec.AnyFlatSpec
@@ -13,11 +14,12 @@ import uk.gov.nationalarchives.referencegenerator.Lambda
 import scala.jdk.CollectionConverters.MapHasAsJava
 
 class LambdaTest extends AnyFlatSpec with Matchers {
+  val config: Config = ConfigFactory.load()
 
   "The Lambda class" should "successfully process a request with the correct number of references" in {
     val mockDDB = mock[DynamoDbClient]
     val input = Lambda.Input(numberOfReferences = 3)
-    val lambda = new Lambda()
+    val lambda = new Lambda(mockDDB, config)
     val getItemMap = Map("pieceCounter" -> AttributeValue.builder().n("10").build()).asJava
     val getItemResponse = GetItemResponse.builder().item(getItemMap).build()
 
@@ -28,17 +30,17 @@ class LambdaTest extends AnyFlatSpec with Matchers {
 
     when(mockDDB.updateItem(any[UpdateItemRequest])).thenReturn(updateItemResponse)
 
-    val actual: APIGatewayProxyResponseEvent = lambda.process(input, mockDDB)
+    val actual: APIGatewayProxyResponseEvent = lambda.process(input)
     val expected: APIGatewayProxyResponseEvent = new APIGatewayProxyResponseEvent()
       .withStatusCode(200)
       .withBody("""["N","P","Q"]""")
     actual shouldBe expected
   }
 
-  it should "return an exception message if getItem fails" in {
+  "The Lambda class" should "return an exception message if getItem fails" in {
     val mockDDB = mock[DynamoDbClient]
     val input = Lambda.Input(numberOfReferences = 1)
-    val lambda = new Lambda()
+    val lambda = new Lambda(mockDDB, config)
     val noSuchElementException = new NoSuchElementException("No item found")
 
     when(mockDDB.getItem(any[GetItemRequest])).thenThrow(noSuchElementException)
@@ -48,17 +50,17 @@ class LambdaTest extends AnyFlatSpec with Matchers {
 
     when(mockDDB.updateItem(any[UpdateItemRequest])).thenReturn(updateItemResponse)
 
-    val actual: APIGatewayProxyResponseEvent = lambda.process(input, mockDDB)
+    val actual: APIGatewayProxyResponseEvent = lambda.process(input)
     val expected: APIGatewayProxyResponseEvent = new APIGatewayProxyResponseEvent()
       .withStatusCode(500)
       .withBody("No item found")
     actual shouldBe expected
   }
 
-  it should "return an exception message if updateItem fails" in {
+  "The Lambda class" should "return an exception message if updateItem fails" in {
     val mockDDB = mock[DynamoDbClient]
     val input = Lambda.Input(numberOfReferences = 1)
-    val lambda = new Lambda()
+    val lambda = new Lambda(mockDDB, config)
     val getItemMap = Map("pieceCounter" -> AttributeValue.builder().n("10").build()).asJava
     val getItemResponse = GetItemResponse.builder().item(getItemMap).build()
 
@@ -68,7 +70,7 @@ class LambdaTest extends AnyFlatSpec with Matchers {
 
     when(mockDDB.updateItem(any[UpdateItemRequest])).thenThrow(resourceNotFoundException)
 
-    val actual: APIGatewayProxyResponseEvent = lambda.process(input, mockDDB)
+    val actual: APIGatewayProxyResponseEvent = lambda.process(input)
     val expected: APIGatewayProxyResponseEvent = new APIGatewayProxyResponseEvent()
       .withStatusCode(500)
       .withBody("The increment cannot be zero")

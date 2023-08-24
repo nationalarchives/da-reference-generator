@@ -24,3 +24,10 @@ libraryDependencies ++= Seq(
   logstash,
   typesafe
 )
+
+(assembly / assemblyJarName) := "reference-generator.jar"
+
+(assembly / assemblyMergeStrategy) := {
+  case PathList("META-INF", xs @_*) => MergeStrategy.discard
+  case _ => MergeStrategy.first
+}

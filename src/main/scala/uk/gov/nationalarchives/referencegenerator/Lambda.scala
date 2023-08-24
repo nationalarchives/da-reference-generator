@@ -7,36 +7,31 @@ import com.typesafe.scalalogging.Logger
 import software.amazon.awssdk.auth.credentials.DefaultCredentialsProvider
 import software.amazon.awssdk.regions.Region
 import software.amazon.awssdk.services.dynamodb.DynamoDbClient
-import uk.gov.nationalarchives.referencegenerator.Lambda.{EncryptedReference, Input}
+import uk.gov.nationalarchives.referencegenerator.Lambda.{PieceReference, Input}
 import io.circe.syntax._
 
 import scala.util.{Failure, Success}
 
-class Lambda extends RequestHandler[APIGatewayProxyRequestEvent, APIGatewayProxyResponseEvent] {
+class Lambda(counterClient: DynamoDbClient, config: Config) extends RequestHandler[APIGatewayProxyRequestEvent, APIGatewayProxyResponseEvent] {
   val logger: Logger = Logger[Lambda]
-  val client: DynamoDbClient = DynamoDbClient.builder()
-    .credentialsProvider(DefaultCredentialsProvider.create())
-    .region(Region.EU_WEST_2)
-    .build()
 
   override def handleRequest(event: APIGatewayProxyRequestEvent, context: Context): APIGatewayProxyResponseEvent = {
-    val config: Config = ConfigFactory.load()
     val queryParams = event.getQueryStringParameters
     val queryParam: String = config.getString("dynamodb.queryParam")
     val numberOfRefs = queryParams.get(queryParam).toInt
 
-    process(Input(numberOfRefs), client)
+    process(Input(numberOfRefs))
   }
 
-  def process(input: Input, client: DynamoDbClient = client): APIGatewayProxyResponseEvent = {
-    val counter = new Counter(client)
+  def process(input: Input): APIGatewayProxyResponseEvent = {
+    val counter = new Counter(counterClient, config)
     val response = new APIGatewayProxyResponseEvent()
     counter.incrementCounter(input.numberOfReferences) match {
       case Success(currentCounter) =>
-        val encryptedReferences = generateReferences(currentCounter.toInt, input.numberOfReferences).asJson.noSpaces
-        logger.info(s"Generated the following references: $encryptedReferences")
+        val references = generateReferences(currentCounter.toInt, input.numberOfReferences).asJson.noSpaces
+        logger.info(s"Generated the following references: $references")
         response.setStatusCode(200)
-        response.setBody(encryptedReferences)
+        response.setBody(references)
         response
       case Failure(exception) =>
         logger.error(exception.getMessage)
@@ -46,13 +41,23 @@ class Lambda extends RequestHandler[APIGatewayProxyRequestEvent, APIGatewayProxy
     }
   }
 
-  private def generateReferences(currentCount: Int, count: Int): List[String] = {
-    (currentCount until currentCount + count).map(cc => EncryptedReference(Base25Encoder.encode(cc.toLong)).reference).toList
+  private def generateReferences(currentCounter: Int, count: Int): List[String] = {
+    (currentCounter until currentCounter + count).map(cc => PieceReference(Base25Encoder.encode(cc.toLong)).reference).toList
   }
 }
 
 object Lambda {
+
+  val counterClient: DynamoDbClient = DynamoDbClient.builder()
+    .credentialsProvider(DefaultCredentialsProvider.create())
+    .region(Region.EU_WEST_2)
+    .build()
+
+  val config: Config = ConfigFactory.load()
+
   case class Input(numberOfReferences: Int)
 
-  case class EncryptedReference(reference: String)
+  case class PieceReference(reference: String)
+
+  def apply(): Lambda = new Lambda(counterClient, config)
 }
