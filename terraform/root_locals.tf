@@ -11,4 +11,5 @@ locals {
       "Role"            = "prvt"
     }
   )
+  dynamodb_hash_key = "v1"
 }
