@@ -10,6 +10,7 @@ module "dynamodb" {
   deletion_protection_enabled    = true
   server_side_encryption_enabled = true
   kms_key_arn                    = module.dynamodb_kms_key.kms_key_arn
+  point_in_time_recovery_enabled = true
 }
 
 module "dynamodb_kms_key" {
