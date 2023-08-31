@@ -1,12 +1,13 @@
 package uk.gov.nationalarchives.utils
 
+import com.amazonaws.auth.AWSCredentialsProvider
 import com.dimafeng.testcontainers.scalatest.TestContainerForAll
 import com.dimafeng.testcontainers.{ContainerDef, DynaliteContainer}
 import com.typesafe.config.Config
 import org.scalatest.BeforeAndAfterEach
 import org.scalatest.flatspec.AnyFlatSpec
 import org.testcontainers.utility.DockerImageName
-import software.amazon.awssdk.auth.credentials.DefaultCredentialsProvider
+import software.amazon.awssdk.auth.credentials.{AwsBasicCredentials, DefaultCredentialsProvider, StaticCredentialsProvider}
 import software.amazon.awssdk.regions.Region
 import software.amazon.awssdk.services.dynamodb.DynamoDbClient
 import software.amazon.awssdk.services.dynamodb.model._
@@ -59,8 +60,9 @@ trait TestContainerUtils extends AnyFlatSpec with TestContainerForAll with Befor
   }
 
   protected def createDynamoDbClient(container: DynaliteContainer): DynamoDbClient = {
+    val credentials = StaticCredentialsProvider.create(AwsBasicCredentials.create("accessKeyId", "secretAccessKey"))
     DynamoDbClient.builder()
-      .credentialsProvider(DefaultCredentialsProvider.create())
+      .credentialsProvider(credentials)
       .region(Region.EU_WEST_2)
       .endpointOverride(URI.create(container.endpointConfiguration.getServiceEndpoint))
       .build()
