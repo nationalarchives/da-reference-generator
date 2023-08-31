@@ -11,6 +11,7 @@ lazy val root = (project in file("."))
 
 libraryDependencies ++= Seq(
   awsSdkDynamoDb,
+  awsSdkDynamoDbV1,
   lambdaJavaCore,
   lambdaJavaEvents,
   scalaTest % Test,
@@ -22,7 +23,9 @@ libraryDependencies ++= Seq(
   scalaLogging,
   logback,
   logstash,
-  typesafe
+  typesafe,
+  testContainer,
+  testContainerDynalite
 )
 
 (assembly / assemblyJarName) := "reference-generator.jar"
