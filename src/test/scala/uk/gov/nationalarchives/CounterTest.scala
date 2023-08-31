@@ -1,114 +1,79 @@
 package uk.gov.nationalarchives
 
-import com.typesafe.config.{Config, ConfigFactory}
-import org.mockito.ArgumentMatchers.any
-import org.mockito.Mockito.when
+import com.dimafeng.testcontainers.DynaliteContainer
+import com.typesafe.config.{Config, ConfigFactory, ConfigValueFactory}
 import org.scalatest.flatspec.AnyFlatSpec
 import org.scalatest.matchers.should.Matchers
-import org.scalatestplus.mockito.MockitoSugar.mock
-import software.amazon.awssdk.services.dynamodb.DynamoDbClient
 import software.amazon.awssdk.services.dynamodb.model._
 import uk.gov.nationalarchives.referencegenerator.Counter
+import uk.gov.nationalarchives.utils.TestContainerUtils
 
-import java.util
-import scala.jdk.CollectionConverters.MapHasAsJava
+import scala.concurrent.ExecutionContext.Implicits.global
+import scala.concurrent.duration.DurationInt
+import scala.concurrent.{Await, Future}
 import scala.util.{Failure, Success}
 
-class CounterTest extends AnyFlatSpec with Matchers {
-  val config: Config = ConfigFactory.load()
+class CounterTest extends AnyFlatSpec with Matchers with TestContainerUtils {
+  override def config: Config = ConfigFactory.load()
 
-  "incrementCounter" should "return an exception if no items are found for the key" in {
-    val mockDDB = mock[DynamoDbClient]
-    val getItem: util.Map[String, AttributeValue] = Map.empty[String, AttributeValue].asJava
-    val getItemResponse = GetItemResponse.builder().item(getItem).build()
+  override def afterContainersStart(containers: containerDef.Container): Unit = super.afterContainersStart(containers)
 
-    when(mockDDB.getItem(any[GetItemRequest])).thenReturn(getItemResponse)
+  "incrementCounter" should "return an exception if no items are found for the key" in withContainers { case container: DynaliteContainer =>
+    val client = createDynamoDbClient(container)
+    val config = ConfigFactory
+      .load()
+      .withValue("dynamodb.key", ConfigValueFactory.fromAnyRef("invalidKey"))
 
-    val counter = new Counter(mockDDB, config)
+    val counter = new Counter(client, config)
     val response = counter.incrementCounter(1)
-    response shouldBe a[Failure[_]]
-    response.failed.get shouldBe an[NoSuchElementException]
-    response.failed.get.getMessage shouldBe s"""No item found with the key: ${config.getString("dynamodb.key")}"""
-  }
-
-  "incrementCounter" should "return an exception if the increment is 0" in {
-    val mockDDB = mock[DynamoDbClient]
-    val currentCount = "10"
-    val getItem = Map("pieceCounter" -> AttributeValue.builder().n(currentCount).build()).asJava
-    val getItemResponse = GetItemResponse.builder().item(getItem).build()
-    val errorMessage = "The conditional request failed"
-
-    val exception = DynamoDbException.builder().message(errorMessage).build()
-
-    val updateItemRequest = generateUpdateItemRequest(currentCount, numberOfReferences = "0")
-
-    when(mockDDB.getItem(any[GetItemRequest])).thenReturn(getItemResponse)
-    when(mockDDB.updateItem(updateItemRequest)).thenThrow(exception)
-
-    val counter = new Counter(mockDDB, config)
-    val response = counter.incrementCounter(0)
 
     response shouldBe a[Failure[_]]
     response.failed.get shouldBe an[DynamoDbException]
-    response.failed.get.getMessage shouldBe errorMessage
+    response.failed.get.getMessage should include("The provided key element does not match the schema")
   }
 
-  "incrementCounter" should "return an exception if the increment is a negative number" in {
-    val mockDDB = mock[DynamoDbClient]
-    val currentCount = "10"
-    val numberOfReferences = "-1"
-    val getItem = Map("pieceCounter" -> AttributeValue.builder().n(currentCount).build()).asJava
-    val getItemResponse = GetItemResponse.builder().item(getItem).build()
-    val errorMessage = "The conditional request failed"
-
-    val exception = DynamoDbException.builder().message(errorMessage).build()
-
-    val updateItemRequest = generateUpdateItemRequest(currentCount, numberOfReferences)
-
-    when(mockDDB.getItem(any[GetItemRequest])).thenReturn(getItemResponse)
-    when(mockDDB.updateItem(updateItemRequest)).thenThrow(exception)
-
-    val counter = new Counter(mockDDB, config)
+  "incrementCounter" should "return an exception if the increment is a negative number" in withContainers { case container: DynaliteContainer =>
+    val client = createDynamoDbClient(container)
+    val counter = new Counter(client, config)
     val response = counter.incrementCounter(-1)
 
     response shouldBe a[Failure[_]]
     response.failed.get shouldBe an[DynamoDbException]
-    response.failed.get.getMessage shouldBe errorMessage
+    response.failed.get.getMessage should include("The conditional request failed")
   }
 
-  "incrementCounter" should "return the current counter if the call to getItem and updateItem succeeds" in {
-    val mockDDB = mock[DynamoDbClient]
-    val getItem = Map("pieceCounter" -> AttributeValue.builder().n("10").build()).asJava
-    val getItemResponse = GetItemResponse.builder().item(getItem).build()
-    val updateItem = Map("pieceCounter" -> AttributeValue.builder().n("12").build()).asJava
-    val updateItemResponse = UpdateItemResponse.builder().attributes(updateItem).build()
+  "incrementCounter" should "return an exception if the increment is 0" in withContainers { case container: DynaliteContainer =>
+    val client = createDynamoDbClient(container)
+    val counter = new Counter(client, config)
+    val response = counter.incrementCounter(0)
 
-    when(mockDDB.getItem(any[GetItemRequest])).thenReturn(getItemResponse)
-    when(mockDDB.updateItem(any[UpdateItemRequest])).thenReturn(updateItemResponse)
+    response shouldBe a[Failure[_]]
+    response.failed.get shouldBe an[DynamoDbException]
+    response.failed.get.getMessage should include("The conditional request failed")
+  }
 
-    val counter = new Counter(mockDDB, config)
-    val response = counter.incrementCounter(2)
+  "incrementCounter" should "return the current counter if the call to getItem and updateItem succeeds" in withContainers { case container: DynaliteContainer =>
+    val client = createDynamoDbClient(container)
+    val counter = new Counter(client, config)
+
+    val response = counter.incrementCounter(10)
 
     response shouldBe Success("10")
   }
 
-  private def generateUpdateItemRequest(currentCounter: String, numberOfReferences: String) = {
-    val tableName: String = config.getString("dynamodb.tableName")
-    val key: String = config.getString("dynamodb.key")
-    val keyVal: String = config.getString("dynamodb.keyVal")
-    val pieceCounter: String = config.getString("dynamodb.pieceCounter")
-    val keyToGet: util.Map[String, AttributeValue] = Map(key -> AttributeValue.builder().s(keyVal).build()).asJava
-    UpdateItemRequest.builder()
-      .tableName(tableName)
-      .key(keyToGet)
-      .updateExpression(s"ADD $pieceCounter :incr")
-      .conditionExpression(s"$pieceCounter = :currCounter AND :incr > :zero")
-      .expressionAttributeValues(Map(
-        ":incr" -> AttributeValue.builder().n(numberOfReferences).build(),
-        ":currCounter" -> AttributeValue.builder().n(currentCounter).build(),
-        ":zero" -> AttributeValue.builder().n("0").build()
-      ).asJava)
-      .returnValues(ReturnValue.ALL_NEW)
-      .build()
+  "incrementCounter" should "return an exception if current counter does not match the retrieved counter value" in withContainers { case container: DynaliteContainer =>
+    val client = createDynamoDbClient(container)
+    val counter = new Counter(client, config)
+
+    val concurrentUpdates = 2
+    val futures = (1 to concurrentUpdates).map(_ => Future {
+      counter.incrementCounter(1)
+    })
+
+    val combinedFuture = Future.sequence(futures)
+    val results = Await.result(combinedFuture, 10.seconds).toList.partition(_.isSuccess)
+
+    results._1.head.get should include("20")
+    results._2.head.failed.get.getMessage should include("The conditional request failed")
   }
 }

@@ -1,35 +1,23 @@
 package uk.gov.nationalarchives
 
 import com.amazonaws.services.lambda.runtime.events.APIGatewayProxyResponseEvent
-import com.typesafe.config.{Config, ConfigFactory}
-import org.mockito.ArgumentMatchers.any
-import org.mockito.Mockito.when
+import com.dimafeng.testcontainers.DynaliteContainer
+import com.typesafe.config.{Config, ConfigFactory, ConfigValueFactory}
 import org.scalatest.flatspec.AnyFlatSpec
 import org.scalatest.matchers.should.Matchers
-import org.scalatestplus.mockito.MockitoSugar.mock
-import software.amazon.awssdk.services.dynamodb.DynamoDbClient
-import software.amazon.awssdk.services.dynamodb.model._
 import uk.gov.nationalarchives.referencegenerator.Lambda
+import uk.gov.nationalarchives.utils.TestContainerUtils
 
-import scala.jdk.CollectionConverters.MapHasAsJava
+class LambdaTest extends AnyFlatSpec with Matchers with TestContainerUtils {
+  override def config: Config = ConfigFactory.load()
 
-class LambdaTest extends AnyFlatSpec with Matchers {
-  val config: Config = ConfigFactory.load()
+  override def afterContainersStart(containers: containerDef.Container): Unit = super.afterContainersStart(containers)
 
-  "The Lambda class" should "successfully process a request with the correct number of references" in {
-    val mockDDB = mock[DynamoDbClient]
+  "The Lambda class" should "return an APIGateWayResponseEvent with the correct number of references" in withContainers { case container: DynaliteContainer =>
+    val client = createDynamoDbClient(container)
     val input = Lambda.Input(numberOfReferences = 3)
-    val lambda = new Lambda(mockDDB, config)
-    val getItemMap = Map("pieceCounter" -> AttributeValue.builder().n("10").build()).asJava
-    val getItemResponse = GetItemResponse.builder().item(getItemMap).build()
 
-    when(mockDDB.getItem(any[GetItemRequest])).thenReturn(getItemResponse)
-
-    val updateItemMap = Map("pieceCounter" -> AttributeValue.builder().n("12").build()).asJava
-    val updateItemResponse = UpdateItemResponse.builder().attributes(updateItemMap).build()
-
-    when(mockDDB.updateItem(any[UpdateItemRequest])).thenReturn(updateItemResponse)
-
+    val lambda = new Lambda(client, config)
     val actual: APIGatewayProxyResponseEvent = lambda.process(input)
     val expected: APIGatewayProxyResponseEvent = new APIGatewayProxyResponseEvent()
       .withStatusCode(200)
@@ -37,43 +25,19 @@ class LambdaTest extends AnyFlatSpec with Matchers {
     actual shouldBe expected
   }
 
-  "The Lambda class" should "return an exception message if getItem fails" in {
-    val mockDDB = mock[DynamoDbClient]
-    val input = Lambda.Input(numberOfReferences = 1)
-    val lambda = new Lambda(mockDDB, config)
-    val noSuchElementException = new NoSuchElementException("No item found")
+  "The Lambda class" should "return an APIGateWayResponseEvent with body containing exception message if dynamoDB calls fail" in withContainers { case container: DynaliteContainer =>
+    val client = createDynamoDbClient(container)
+    val input = Lambda.Input(numberOfReferences = 3)
+    val config = ConfigFactory
+      .load()
+      .withValue("dynamodb.key", ConfigValueFactory.fromAnyRef("invalidKey"))
 
-    when(mockDDB.getItem(any[GetItemRequest])).thenThrow(noSuchElementException)
-
-    val updateItemMap = Map("pieceCounter" -> AttributeValue.builder().n("12").build()).asJava
-    val updateItemResponse = UpdateItemResponse.builder().attributes(updateItemMap).build()
-
-    when(mockDDB.updateItem(any[UpdateItemRequest])).thenReturn(updateItemResponse)
-
+    val lambda = new Lambda(client, config)
     val actual: APIGatewayProxyResponseEvent = lambda.process(input)
     val expected: APIGatewayProxyResponseEvent = new APIGatewayProxyResponseEvent()
       .withStatusCode(500)
-      .withBody("No item found")
-    actual shouldBe expected
-  }
-
-  "The Lambda class" should "return an exception message if updateItem fails" in {
-    val mockDDB = mock[DynamoDbClient]
-    val input = Lambda.Input(numberOfReferences = 1)
-    val lambda = new Lambda(mockDDB, config)
-    val getItemMap = Map("pieceCounter" -> AttributeValue.builder().n("10").build()).asJava
-    val getItemResponse = GetItemResponse.builder().item(getItemMap).build()
-
-    when(mockDDB.getItem(any[GetItemRequest])).thenReturn(getItemResponse)
-
-    val resourceNotFoundException = ResourceNotFoundException.builder().message("The increment cannot be zero").build()
-
-    when(mockDDB.updateItem(any[UpdateItemRequest])).thenThrow(resourceNotFoundException)
-
-    val actual: APIGatewayProxyResponseEvent = lambda.process(input)
-    val expected: APIGatewayProxyResponseEvent = new APIGatewayProxyResponseEvent()
-      .withStatusCode(500)
-      .withBody("The increment cannot be zero")
-    actual shouldBe expected
+      .withBody("The provided key element does not match the schema")
+    actual.getStatusCode shouldBe expected.getStatusCode
+    actual.getBody should include(expected.getBody)
   }
 }

@@ -1,20 +1,19 @@
 package uk.gov.nationalarchives.utils
 
-
-import com.dimafeng.testcontainers.scalatest.{TestContainerForAll, TestContainerForEach}
+import com.dimafeng.testcontainers.scalatest.TestContainerForAll
 import com.dimafeng.testcontainers.{ContainerDef, DynaliteContainer}
-import com.typesafe.config.{Config, ConfigFactory}
+import com.typesafe.config.Config
 import org.scalatest.BeforeAndAfterEach
 import org.scalatest.flatspec.AnyFlatSpec
 import org.testcontainers.utility.DockerImageName
 import software.amazon.awssdk.auth.credentials.DefaultCredentialsProvider
 import software.amazon.awssdk.regions.Region
 import software.amazon.awssdk.services.dynamodb.DynamoDbClient
-import software.amazon.awssdk.services.dynamodb.model.{AttributeDefinition, AttributeValue, CreateTableRequest, DescribeTableRequest, KeySchemaElement, KeyType, ProvisionedThroughput, PutItemRequest, ScalarAttributeType}
+import software.amazon.awssdk.services.dynamodb.model._
 import software.amazon.awssdk.services.dynamodb.waiters.DynamoDbWaiter
 
-import scala.jdk.CollectionConverters._
 import java.net.URI
+import scala.jdk.CollectionConverters._
 
 trait TestContainerUtils extends AnyFlatSpec with TestContainerForAll with BeforeAndAfterEach {
   val tableName: String = config.getString("dynamodb.tableName")
@@ -44,16 +43,11 @@ trait TestContainerUtils extends AnyFlatSpec with TestContainerForAll with Befor
   }
 
   private def createTable(container: DynaliteContainer): Unit = {
-    val client: DynamoDbClient = DynamoDbClient.builder()
-      .credentialsProvider(DefaultCredentialsProvider.create())
-      .region(Region.EU_WEST_2)
-      .endpointOverride(URI.create(container.endpointConfiguration.getServiceEndpoint))
-      .build()
-
+    val client: DynamoDbClient = createDynamoDbClient(container)
     val attributeDefinitions = List(
       AttributeDefinition.builder()
         .attributeName(primaryKey)
-        .attributeType(ScalarAttributeType.S) // String type
+        .attributeType(ScalarAttributeType.S)
         .build()
     )
 
@@ -78,8 +72,8 @@ trait TestContainerUtils extends AnyFlatSpec with TestContainerForAll with Befor
 
     // Create the table
     client.createTable(createTableRequest)
-    println(s"Table created: $tableName")
 
+    //Wait for table to be created
     val waiter = DynamoDbWaiter.builder()
       .client(client)
       .build()
@@ -100,6 +94,5 @@ trait TestContainerUtils extends AnyFlatSpec with TestContainerForAll with Befor
       .build()
 
     client.putItem(putItemRequest)
-    println("Item added to the table.")
   }
 }

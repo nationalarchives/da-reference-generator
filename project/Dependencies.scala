@@ -5,8 +5,8 @@ object Dependencies {
   private val testContainersVersion = "0.40.17"
 
   lazy val scalaTest = "org.scalatest" %% "scalatest" % "3.2.16"
-  lazy val mockito = "org.scalatestplus" %% "mockito-4-11" % "3.2.16.0"
-  lazy val awsSdkDynamoDb = "software.amazon.awssdk" % "dynamodb" % "2.20.110"
+  lazy val awsSdkDynamoDbV2 = "software.amazon.awssdk" % "dynamodb" % "2.20.110"
+  lazy val awsSdkDynamoDbV1 = "com.amazonaws" % "aws-java-sdk-dynamodb" % "1.12.538"
   lazy val lambdaJavaCore = "com.amazonaws" % "aws-lambda-java-core" % "1.2.2"
   lazy val lambdaJavaEvents = "com.amazonaws" % "aws-lambda-java-events" % "3.11.1"
   lazy val ocitools = "uk.gov.nationalarchives.oci" % "oci-tools-scala_2.13" % "0.3.0"
@@ -17,7 +17,6 @@ object Dependencies {
   lazy val logback = "ch.qos.logback" % "logback-classic" % "1.4.11"
   lazy val logstash = "net.logstash.logback" % "logstash-logback-encoder" % "7.4"
   lazy val typesafe = "com.typesafe" % "config" % "1.4.2"
-  lazy val awsSdkDynamoDbV1 = "com.amazonaws" % "aws-java-sdk-dynamodb" % "1.12.538"
   lazy val testContainer = "com.dimafeng" %% "testcontainers-scala-scalatest" % testContainersVersion % Test
   lazy val testContainerDynalite = "com.dimafeng" %% "testcontainers-scala-dynalite" % testContainersVersion
 }

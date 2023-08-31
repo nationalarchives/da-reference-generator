@@ -10,12 +10,11 @@ lazy val root = (project in file("."))
   )
 
 libraryDependencies ++= Seq(
-  awsSdkDynamoDb,
+  awsSdkDynamoDbV2,
   awsSdkDynamoDbV1,
   lambdaJavaCore,
   lambdaJavaEvents,
   scalaTest % Test,
-  mockito % Test,
   ocitools,
   circeCore,
   circeGeneric,
