@@ -1,1 +1,46 @@
-# [TODO]
+name: 'Apply Terraform and deploy lambda'
+on:
+  workflow_dispatch:
+    inputs:
+      environment:
+        type: choice
+        description: 'Environment to deploy to'
+        required: true
+        options:
+          - intg
+          - staging
+          - prod
+        default: 'intg'
+      to-deploy:
+        description: 'Version to deploy'
+        required: true
+permissions:
+  id-token: write
+  contents: write
+jobs:
+  apply:
+    uses: nationalarchives/tdr-github-actions/.github/workflows/terraform_apply.yml@main
+    with:
+      repo-name: da-reference-generator
+      environment: ${{ github.event.inputs.environment }}
+      working-directory: 'terraform'
+    secrets:
+      MANAGEMENT_ACCOUNT: ${{ secrets.TDR_MANAGEMENT_ACCOUNT }}
+      WORKFLOW_PAT: ${{ secrets.TDR_WORKFLOW_PAT }}
+      ACCOUNT_NUMBER: ${{ secrets.TDR_ACCOUNT_NUMBER }}
+      SLACK_WEBHOOK: ${{ secrets.TDR_SLACK_WEBHOOK }}
+      INTG_ACCOUNT_NUMBER: ${{ secrets.TDR_INTG_ACCOUNT_NUMBER }}
+      STAGING_ACCOUNT_NUMBER: ${{ secrets.TDR_STAGING_ACCOUNT_NUMBER }}
+      PROD_ACCOUNT_NUMBER: ${{ secrets.TDR_PROD_ACCOUNT_NUMBER }}
+  deploy:
+    uses: nationalarchives/tdr-github-actions/.github/workflows/lambda_deploy.yml@main
+    with:
+      lambda-name: reference-generator
+      deployment-package: reference-generator.jar
+      environment: ${{ github.event.inputs.environment }}
+      to-deploy: ${{ github.event.inputs.to-deploy }}
+    secrets:
+      ACCOUNT_NUMBER: ${{ secrets.TDR_ACCOUNT_NUMBER }}
+      MANAGEMENT_ACCOUNT: ${{ secrets.TDR_MANAGEMENT_ACCOUNT }}
+      WORKFLOW_PAT: ${{ secrets.TDR_WORKFLOW_PAT }}
+      SLACK_WEBHOOK: ${{ secrets.TDR_SLACK_WEBHOOK }}
