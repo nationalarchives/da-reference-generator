@@ -65,13 +65,13 @@ class CounterTest extends AnyFlatSpec with Matchers with TestContainerUtils {
     val client = createDynamoDbClient(container)
     val counter = new Counter(client, config)
 
-    val concurrentUpdates = 2
+    val concurrentUpdates = 4
     val futures = (1 to concurrentUpdates).map(_ => Future {
       counter.incrementCounter(1)
     })
 
     val combinedFuture = Future.sequence(futures)
-    val results = Await.result(combinedFuture, 30.seconds).toList.partition(_.isSuccess)
+    val results = Await.result(combinedFuture, 10.seconds).toList.partition(_.isSuccess)
 
     assert(results._1.head.get.nonEmpty)
     results._2.head.failed.get.getMessage should include("The conditional request failed")
