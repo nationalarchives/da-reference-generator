@@ -50,35 +50,24 @@ trait TestContainerUtils extends AnyFlatSpec with TestContainerForAll with Befor
       .endpointOverride(URI.create(container.endpointConfiguration.getServiceEndpoint))
       .build()
 
-    // Define the attribute definitions for the primary key
     val attributeDefinitions = List(
       AttributeDefinition.builder()
         .attributeName(primaryKey)
-        .attributeType(ScalarAttributeType.S)
-        .build(),
-      AttributeDefinition.builder()
-        .attributeName(pieceCounterColumn)
-        .attributeType(ScalarAttributeType.N)
-        .build(),
-    ).asJava
+        .attributeType(ScalarAttributeType.S) // String type
+        .build()
+    )
 
-    // Define the key schema
     val keySchema = List(
       KeySchemaElement.builder()
         .attributeName(primaryKey)
         .keyType(KeyType.HASH)
-        .build(),
-      KeySchemaElement.builder()
-        .attributeName(pieceCounterColumn)
-        .keyType(KeyType.RANGE)
         .build()
-    ).asJava
+    )
 
-    // Create the table request
     val createTableRequest = CreateTableRequest.builder()
       .tableName(tableName)
-      .attributeDefinitions(attributeDefinitions)
-      .keySchema(keySchema)
+      .attributeDefinitions(attributeDefinitions.asJava)
+      .keySchema(keySchema.asJava)
       .provisionedThroughput(
         ProvisionedThroughput.builder()
           .readCapacityUnits(5L)
@@ -87,11 +76,10 @@ trait TestContainerUtils extends AnyFlatSpec with TestContainerForAll with Befor
       )
       .build()
 
+    // Create the table
     client.createTable(createTableRequest)
-    println(s"Table created: ${client.listTables()}")
-    println(client.describeTable(DescribeTableRequest.builder().tableName(tableName).build()))
+    println(s"Table created: $tableName")
 
-    //Wait for the table to be created
     val waiter = DynamoDbWaiter.builder()
       .client(client)
       .build()
@@ -100,18 +88,17 @@ trait TestContainerUtils extends AnyFlatSpec with TestContainerForAll with Befor
       DescribeTableRequest.builder().tableName(tableName).build()
     )
 
-    // Put a single entry into the table
+    // Put an entry into the table
     val putItemRequest = PutItemRequest.builder()
       .tableName(tableName)
       .item(
         Map(
           primaryKey -> AttributeValue.builder().s(filePieceCounter).build(),
-          pieceCounterColumn -> AttributeValue.builder().n("0").build()
+          pieceCounterColumn -> AttributeValue.builder().n("10").build()
         ).asJava
-      ).build()
+      )
+      .build()
 
-    println("Constructed PutItemRequest:")
-    println(putItemRequest.toString)
     client.putItem(putItemRequest)
     println("Item added to the table.")
   }
