@@ -21,6 +21,30 @@ trait TestContainerUtils extends AnyFlatSpec with TestContainerForAll with Befor
   val pieceCounterColumn: String = config.getString("dynamodb.pieceCounter")
   val filePieceCounter: String = config.getString("dynamodb.keyVal")
 
+  val attributeDefinitions: List[AttributeDefinition] = List(
+    AttributeDefinition.builder()
+      .attributeName(primaryKey)
+      .attributeType(ScalarAttributeType.S)
+      .build()
+  )
+  val keySchema: List[KeySchemaElement] = List(
+    KeySchemaElement.builder()
+      .attributeName(primaryKey)
+      .keyType(KeyType.HASH)
+      .build()
+  )
+  val createTableRequest: CreateTableRequest = CreateTableRequest.builder()
+    .tableName(tableName)
+    .attributeDefinitions(attributeDefinitions.asJava)
+    .keySchema(keySchema.asJava)
+    .provisionedThroughput(
+      ProvisionedThroughput.builder()
+        .readCapacityUnits(5L)
+        .writeCapacityUnits(5L)
+        .build()
+    )
+    .build()
+
   def config: Config
 
   override val containerDef: ContainerDef = DynaliteContainer.Def(
@@ -44,36 +68,9 @@ trait TestContainerUtils extends AnyFlatSpec with TestContainerForAll with Befor
 
   private def createTable(container: DynaliteContainer): Unit = {
     val client: DynamoDbClient = createDynamoDbClient(container)
-    val attributeDefinitions = List(
-      AttributeDefinition.builder()
-        .attributeName(primaryKey)
-        .attributeType(ScalarAttributeType.S)
-        .build()
-    )
 
-    val keySchema = List(
-      KeySchemaElement.builder()
-        .attributeName(primaryKey)
-        .keyType(KeyType.HASH)
-        .build()
-    )
-
-    val createTableRequest = CreateTableRequest.builder()
-      .tableName(tableName)
-      .attributeDefinitions(attributeDefinitions.asJava)
-      .keySchema(keySchema.asJava)
-      .provisionedThroughput(
-        ProvisionedThroughput.builder()
-          .readCapacityUnits(5L)
-          .writeCapacityUnits(5L)
-          .build()
-      )
-      .build()
-
-    // Create the table
     client.createTable(createTableRequest)
 
-    //Wait for table to be created
     val waiter = DynamoDbWaiter.builder()
       .client(client)
       .build()
@@ -82,7 +79,6 @@ trait TestContainerUtils extends AnyFlatSpec with TestContainerForAll with Befor
       DescribeTableRequest.builder().tableName(tableName).build()
     )
 
-    // Put an entry into the table
     val putItemRequest = PutItemRequest.builder()
       .tableName(tableName)
       .item(
