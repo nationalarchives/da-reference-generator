@@ -27,6 +27,8 @@ libraryDependencies ++= Seq(
   testContainerDynalite
 )
 
+(Test / envVars) := Map("AWS_ACCESS_KEY_ID" -> "accesskey", "AWS_SECRET_ACCESS_KEY" -> "secret")
+
 (assembly / assemblyJarName) := "reference-generator.jar"
 
 (assembly / assemblyMergeStrategy) := {
