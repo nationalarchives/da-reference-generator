@@ -7,10 +7,10 @@ import com.typesafe.scalalogging.Logger
 import software.amazon.awssdk.auth.credentials.DefaultCredentialsProvider
 import software.amazon.awssdk.regions.Region
 import software.amazon.awssdk.services.dynamodb.DynamoDbClient
-import uk.gov.nationalarchives.referencegenerator.Lambda.{Reference, Input}
+import uk.gov.nationalarchives.referencegenerator.Lambda.{Input, Reference}
 import io.circe.syntax._
 
-import scala.util.{Failure, Success}
+import scala.util.{Failure, Success, Try}
 
 class Lambda(counterClient: DynamoDbClient, config: Config) extends RequestHandler[APIGatewayProxyRequestEvent, APIGatewayProxyResponseEvent] {
   val logger: Logger = Logger[Lambda]
@@ -18,9 +18,17 @@ class Lambda(counterClient: DynamoDbClient, config: Config) extends RequestHandl
   override def handleRequest(event: APIGatewayProxyRequestEvent, context: Context): APIGatewayProxyResponseEvent = {
     val queryParams = event.getQueryStringParameters
     val queryParam: String = config.getString("dynamodb.queryParam")
-    val numberOfRefs = queryParams.get(queryParam).toInt
-
-    process(Input(numberOfRefs))
+    val convertQueryToInt: Try[Int] = Try(queryParams.get(queryParam).toInt)
+    convertQueryToInt match {
+      case Success(numberOfReferences) =>
+        process(Input(numberOfReferences))
+      case Failure(exception) =>
+        val response = new APIGatewayProxyResponseEvent()
+        logger.error(exception.getMessage)
+        response.setStatusCode(500)
+        response.setBody(exception.getMessage)
+        response
+    }
   }
 
   def process(input: Input): APIGatewayProxyResponseEvent = {
@@ -42,7 +50,7 @@ class Lambda(counterClient: DynamoDbClient, config: Config) extends RequestHandl
   }
 
   private def generateReferences(currentCounter: Int, count: Int): List[String] = {
-    (currentCounter until currentCounter + count).map(cc => Reference(Base25Encoder.encode(cc.toLong)).reference).toList
+    (currentCounter until currentCounter + count).map(cc => Reference(Encoder.encode(cc.toLong)).reference).toList
   }
 }
 
