@@ -15,11 +15,11 @@ class Counter(counterClient: DynamoDbClient, config: Config) {
   val tableName: String = config.getString("dynamodb.tableName")
   val key: String = config.getString("dynamodb.key")
   val keyVal: String = config.getString("dynamodb.keyVal")
-  val pieceCounter: String = config.getString("dynamodb.pieceCounter")
+  val referenceCounter: String = config.getString("dynamodb.referenceCounter")
   val keyToGet: util.Map[String, AttributeValue] = Map(key -> AttributeValue.builder().s(keyVal).build()).asJava
 
-  val updateExpression = s"ADD $pieceCounter :incr"
-  val conditionExpression = s"$pieceCounter = :currCounter AND :incr > :zero"
+  val updateExpression = s"ADD $referenceCounter :incr"
+  val conditionExpression = s"$referenceCounter = :currCounter AND :incr > :zero"
   val createExpressionAttributeValues: (String, Int) => java.util.Map[String, AttributeValue] = (currentCounter, numberOfReferences) => {
     Map(
       ":incr" -> AttributeValue.builder().n(numberOfReferences.toString).build(),
@@ -47,7 +47,7 @@ class Counter(counterClient: DynamoDbClient, config: Config) {
       val currentCounterResponse: Map[String, AttributeValue] = counterClient.getItem(currentCountRequest).item.asScala.toMap
 
       if (currentCounterResponse.nonEmpty) {
-        val currentCounter = currentCounterResponse(pieceCounter).n()
+        val currentCounter = currentCounterResponse(referenceCounter).n()
         counterClient.updateItem(incrementCounterRequest(currentCounter, numberOfReferences))
         logger.info(s"The counter value $currentCounter has been updated by $numberOfReferences")
         currentCounter

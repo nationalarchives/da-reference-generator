@@ -7,7 +7,7 @@ import com.typesafe.scalalogging.Logger
 import software.amazon.awssdk.auth.credentials.DefaultCredentialsProvider
 import software.amazon.awssdk.regions.Region
 import software.amazon.awssdk.services.dynamodb.DynamoDbClient
-import uk.gov.nationalarchives.referencegenerator.Lambda.{PieceReference, Input}
+import uk.gov.nationalarchives.referencegenerator.Lambda.{Reference, Input}
 import io.circe.syntax._
 
 import scala.util.{Failure, Success}
@@ -42,7 +42,7 @@ class Lambda(counterClient: DynamoDbClient, config: Config) extends RequestHandl
   }
 
   private def generateReferences(currentCounter: Int, count: Int): List[String] = {
-    (currentCounter until currentCounter + count).map(cc => PieceReference(Base25Encoder.encode(cc.toLong)).reference).toList
+    (currentCounter until currentCounter + count).map(cc => Reference(Base25Encoder.encode(cc.toLong)).reference).toList
   }
 }
 
@@ -57,7 +57,7 @@ object Lambda {
 
   case class Input(numberOfReferences: Int)
 
-  case class PieceReference(reference: String)
+  case class Reference(reference: String)
 
   def apply(): Lambda = new Lambda(counterClient, config)
 }

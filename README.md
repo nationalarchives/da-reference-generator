@@ -1,10 +1,10 @@
 # DA Reference Generator
 
-Repository containing code for a self-contained service to generate unique "piece references" for records transferred to The National Archives (TNA).
+Repository containing code for a self-contained service to generate unique "references" for records transferred to The National Archives (TNA).
 
 The service consists of three main components:
-* *Lambda function*: the Lambda generates the "piece references" based on a incremented counter;
-* *DynamoDb Table*: the table contains the counter to generate the unique "piece references";
+* *Lambda function*: the Lambda generates the "references" based on a incremented counter;
+* *DynamoDb Table*: the table contains the counter to generate the unique "references";
 * *API Gateway*: Provides access to the service from other AWS services and external clients outside of AWS.
 
 ## Lambda
@@ -46,9 +46,9 @@ The reference counter in the DynamoDb table needs to be manually seeded before t
     ```
    {
      "v1": {
-         "S": "filePieceCounter"
+         "S": "fileCounter"
      },
-     "pieceCounter": {
+     "referenceCounter": {
          "N": "0"
      }
    }

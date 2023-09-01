@@ -1,13 +1,12 @@
 package uk.gov.nationalarchives.utils
 
-import com.amazonaws.auth.AWSCredentialsProvider
 import com.dimafeng.testcontainers.scalatest.TestContainerForAll
 import com.dimafeng.testcontainers.{ContainerDef, DynaliteContainer}
 import com.typesafe.config.Config
 import org.scalatest.BeforeAndAfterEach
 import org.scalatest.flatspec.AnyFlatSpec
 import org.testcontainers.utility.DockerImageName
-import software.amazon.awssdk.auth.credentials.{AwsBasicCredentials, DefaultCredentialsProvider, StaticCredentialsProvider}
+import software.amazon.awssdk.auth.credentials.{AwsBasicCredentials, StaticCredentialsProvider}
 import software.amazon.awssdk.regions.Region
 import software.amazon.awssdk.services.dynamodb.DynamoDbClient
 import software.amazon.awssdk.services.dynamodb.model._
@@ -19,8 +18,8 @@ import scala.jdk.CollectionConverters._
 trait TestContainerUtils extends AnyFlatSpec with TestContainerForAll with BeforeAndAfterEach {
   val tableName: String = config.getString("dynamodb.tableName")
   val primaryKey: String = config.getString("dynamodb.key")
-  val pieceCounterColumn: String = config.getString("dynamodb.pieceCounter")
-  val filePieceCounter: String = config.getString("dynamodb.keyVal")
+  val counterColumn: String = config.getString("dynamodb.referenceCounter")
+  val fileCounter: String = config.getString("dynamodb.keyVal")
 
   val attributeDefinitions: List[AttributeDefinition] = List(
     AttributeDefinition.builder()
@@ -85,8 +84,8 @@ trait TestContainerUtils extends AnyFlatSpec with TestContainerForAll with Befor
       .tableName(tableName)
       .item(
         Map(
-          primaryKey -> AttributeValue.builder().s(filePieceCounter).build(),
-          pieceCounterColumn -> AttributeValue.builder().n("10").build()
+          primaryKey -> AttributeValue.builder().s(fileCounter).build(),
+          counterColumn -> AttributeValue.builder().n("10").build()
         ).asJava
       )
       .build()

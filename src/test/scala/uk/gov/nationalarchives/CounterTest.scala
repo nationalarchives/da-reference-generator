@@ -52,7 +52,7 @@ class CounterTest extends AnyFlatSpec with Matchers with TestContainerUtils {
     response.failed.get.getMessage should include("The conditional request failed")
   }
 
-  "incrementCounter" should "return the current counter if the call to getItem and updateItem succeeds" in withContainers { case container: DynaliteContainer =>
+  "incrementCounter" should "return the current counter if the calls to getItem and updateItem succeeds" in withContainers { case container: DynaliteContainer =>
     val client = createDynamoDbClient(container)
     val counter = new Counter(client, config)
 
