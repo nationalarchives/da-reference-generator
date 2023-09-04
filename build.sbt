@@ -10,6 +10,26 @@ lazy val root = (project in file("."))
   )
 
 libraryDependencies ++= Seq(
-  awsSdkDynamoDb,
-  scalaTest % Test
+  awsSdkDynamoDbV2,
+  awsSdkDynamoDbV1 % Test,
+  lambdaJavaCore,
+  lambdaJavaEvents,
+  scalaTest % Test,
+  ocitools,
+  circeCore,
+  circeGeneric,
+  circeParser,
+  scalaLogging,
+  logback,
+  logstash,
+  typesafe,
+  testContainer % Test,
+  testContainerDynalite % Test
 )
+
+(assembly / assemblyJarName) := "reference-generator.jar"
+
+(assembly / assemblyMergeStrategy) := {
+  case PathList("META-INF", xs @_*) => MergeStrategy.discard
+  case _ => MergeStrategy.first
+}
