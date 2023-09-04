@@ -39,6 +39,7 @@ jobs:
       deployment-package: reference-generator.jar
       environment: ${{ github.event.inputs.environment }}
       to-deploy: ${{ github.event.inputs.to-deploy }}
+      project: da
     secrets:
       ACCOUNT_NUMBER: ${{ secrets.TDR_ACCOUNT_NUMBER }}
       MANAGEMENT_ACCOUNT: ${{ secrets.TDR_MANAGEMENT_ACCOUNT }}
