@@ -28,13 +28,21 @@ module "reference_generator_lambda" {
   source        = "./da-terraform-modules/lambda"
   function_name = local.reference_generator_function_name
   handler       = "uk.gov.nationalarchives.referencegenerator.Lambda::handleRequest"
-  policies = {
+  policies      = {
     "${upper(var.project)}ReferenceGeneratorLambdaPolicy${title(local.hosting_environment)}" = templatefile("${path.module}/templates/lambda/reference_generator_policy.json.tpl", {
       function_name = local.reference_generator_function_name
       account_id    = data.aws_caller_identity.current.account_id
       table_name    = local.reference_counter_table_name
       kms_key_arn   = module.dynamodb_kms_key.kms_key_arn
     })
+  }
+  plaintext_env_vars = {
+    ENVIRONMENT         = local.hosting_environment
+    TABLE_NAME          = "${var.project}-reference-counter"
+    REFERENCE_KEY       = "v1"
+    REFERENCE_KEY_VALUE = "fileCounter"
+    REFERENCE_COUNTER   = "referenceCounter"
+    QUERY_PARAM         = "numberofrefs"
   }
   runtime = "java11"
   tags    = local.hosting_common_tags
