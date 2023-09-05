@@ -7,12 +7,14 @@ import com.typesafe.scalalogging.Logger
 import software.amazon.awssdk.auth.credentials.DefaultCredentialsProvider
 import software.amazon.awssdk.regions.Region
 import software.amazon.awssdk.services.dynamodb.DynamoDbClient
-import uk.gov.nationalarchives.referencegenerator.Lambda.{Input, Reference}
+import uk.gov.nationalarchives.referencegenerator.Lambda.{Input, Reference, config, counterClient}
 import io.circe.syntax._
+import software.amazon.awssdk.http.SdkHttpClient
+import software.amazon.awssdk.http.apache.ApacheHttpClient
 
 import scala.util.{Failure, Success, Try}
 
-class Lambda(counterClient: DynamoDbClient, config: Config) extends RequestHandler[APIGatewayProxyRequestEvent, APIGatewayProxyResponseEvent] {
+class Lambda extends RequestHandler[APIGatewayProxyRequestEvent, APIGatewayProxyResponseEvent] {
   val logger: Logger = Logger[Lambda]
 
   override def handleRequest(event: APIGatewayProxyRequestEvent, context: Context): APIGatewayProxyResponseEvent = {
@@ -31,7 +33,7 @@ class Lambda(counterClient: DynamoDbClient, config: Config) extends RequestHandl
     }
   }
 
-  def process(input: Input): APIGatewayProxyResponseEvent = {
+  def process(input: Input, counterClient: DynamoDbClient = counterClient, config: Config = config): APIGatewayProxyResponseEvent = {
     val counter = new Counter(counterClient, config)
     val response = new APIGatewayProxyResponseEvent()
     counter.incrementCounter(input.numberOfReferences) match {
@@ -56,8 +58,10 @@ class Lambda(counterClient: DynamoDbClient, config: Config) extends RequestHandl
 
 object Lambda {
 
+  val sdkHttpClient: SdkHttpClient = ApacheHttpClient.builder().build()
   val counterClient: DynamoDbClient = DynamoDbClient.builder()
     .credentialsProvider(DefaultCredentialsProvider.create())
+    .httpClient(sdkHttpClient)
     .region(Region.EU_WEST_2)
     .build()
 
@@ -66,6 +70,4 @@ object Lambda {
   case class Input(numberOfReferences: Int)
 
   case class Reference(reference: String)
-
-  def apply(): Lambda = new Lambda(counterClient, config)
 }
