@@ -36,6 +36,14 @@ module "reference_generator_lambda" {
       kms_key_arn   = module.dynamodb_kms_key.kms_key_arn
     })
   }
+  plaintext_env_vars = {
+    ENVIRONMENT         = local.hosting_environment
+    TABLE_NAME          = "${var.project}-reference-counter"
+    REFERENCE_KEY       = "v1"
+    REFERENCE_KEY_VALUE = "fileCounter"
+    REFERENCE_COUNTER   = "referenceCounter"
+    QUERY_PARAM         = "numberofrefs"
+  }
   runtime = "java11"
   tags    = local.hosting_common_tags
 }
