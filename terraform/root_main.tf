@@ -44,8 +44,8 @@ module "reference_generator_lambda" {
     REFERENCE_COUNTER   = "referenceCounter"
     QUERY_PARAM         = "numberofrefs"
   }
-  runtime = "java11"
+  runtime         = "java11"
   timeout_seconds = 60
-  memory_size = 1024
-  tags    = local.hosting_common_tags
+  memory_size     = 1024
+  tags            = local.hosting_common_tags
 }
