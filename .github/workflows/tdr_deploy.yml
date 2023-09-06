@@ -33,6 +33,7 @@ jobs:
       STAGING_ACCOUNT_NUMBER: ${{ secrets.TDR_STAGING_ACCOUNT_NUMBER }}
       PROD_ACCOUNT_NUMBER: ${{ secrets.TDR_PROD_ACCOUNT_NUMBER }}
   deploy:
+    needs: apply
     uses: nationalarchives/tdr-github-actions/.github/workflows/lambda_deploy.yml@main
     with:
       lambda-name: reference-generator
