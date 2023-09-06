@@ -45,5 +45,7 @@ module "reference_generator_lambda" {
     QUERY_PARAM         = "numberofrefs"
   }
   runtime = "java11"
+  timeout_seconds = 60
+  memory_size = 1024
   tags    = local.hosting_common_tags
 }
