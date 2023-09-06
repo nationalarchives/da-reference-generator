@@ -17,8 +17,8 @@ class LambdaTest extends AnyFlatSpec with Matchers with TestContainerUtils {
     val client = createDynamoDbClient(container)
     val input = Lambda.Input(numberOfReferences = 3)
 
-    val lambda = new Lambda(client, config)
-    val actual: APIGatewayProxyResponseEvent = lambda.process(input)
+    val lambda = new Lambda()
+    val actual: APIGatewayProxyResponseEvent = lambda.process(input, client, config)
     val expected: APIGatewayProxyResponseEvent = new APIGatewayProxyResponseEvent()
       .withStatusCode(200)
       .withBody("""["N","P","Q"]""")
@@ -32,8 +32,8 @@ class LambdaTest extends AnyFlatSpec with Matchers with TestContainerUtils {
       .load()
       .withValue("dynamodb.key", ConfigValueFactory.fromAnyRef("invalidKey"))
 
-    val lambda = new Lambda(client, config)
-    val actual: APIGatewayProxyResponseEvent = lambda.process(input)
+    val lambda = new Lambda()
+    val actual: APIGatewayProxyResponseEvent = lambda.process(input, client, config)
     val expected: APIGatewayProxyResponseEvent = new APIGatewayProxyResponseEvent()
       .withStatusCode(500)
       .withBody("The provided key element does not match the schema")
