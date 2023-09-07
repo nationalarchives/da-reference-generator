@@ -2,7 +2,7 @@ import sbt._
 
 object Dependencies {
   private val circeVersion = "0.14.5"
-  private val testContainersVersion = "0.40.17"
+  private val testContainersVersion = "0.41.0"
 
   lazy val scalaTest = "org.scalatest" %% "scalatest" % "3.2.16"
   lazy val awsSdkDynamoDbV2 = "software.amazon.awssdk" % "dynamodb" % "2.20.110"
