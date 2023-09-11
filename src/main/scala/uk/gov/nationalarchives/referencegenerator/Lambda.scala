@@ -7,7 +7,7 @@ import com.typesafe.scalalogging.Logger
 import software.amazon.awssdk.auth.credentials.DefaultCredentialsProvider
 import software.amazon.awssdk.regions.Region
 import software.amazon.awssdk.services.dynamodb.DynamoDbClient
-import uk.gov.nationalarchives.referencegenerator.Lambda.{Input, Reference, config, counterClient}
+import uk.gov.nationalarchives.referencegenerator.Lambda.{Input, Reference, config, counterClient, logger}
 import io.circe.syntax._
 import software.amazon.awssdk.http.SdkHttpClient
 import software.amazon.awssdk.http.apache.ApacheHttpClient
@@ -15,7 +15,6 @@ import software.amazon.awssdk.http.apache.ApacheHttpClient
 import scala.util.{Failure, Success, Try}
 
 class Lambda extends RequestHandler[APIGatewayProxyRequestEvent, APIGatewayProxyResponseEvent] {
-  val logger: Logger = Logger[Lambda]
 
   override def handleRequest(event: APIGatewayProxyRequestEvent, context: Context): APIGatewayProxyResponseEvent = {
     val queryParams = event.getQueryStringParameters
@@ -57,7 +56,7 @@ class Lambda extends RequestHandler[APIGatewayProxyRequestEvent, APIGatewayProxy
 }
 
 object Lambda {
-
+  val logger: Logger = Logger[Lambda]
   val sdkHttpClient: SdkHttpClient = ApacheHttpClient.builder().build()
   val counterClient: DynamoDbClient = DynamoDbClient.builder()
     .credentialsProvider(DefaultCredentialsProvider.create())
