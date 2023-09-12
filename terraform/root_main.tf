@@ -48,4 +48,19 @@ module "reference_generator_lambda" {
   timeout_seconds = 60
   memory_size     = 1024
   tags            = local.hosting_common_tags
+  lambda_invoke_permissions = {
+    "apigateway.amazonaws.com" = "${module.reference_generator_api_gateway.api_execution_arn}/*/GET/counter"
+  }
+}
+
+module "reference_generator_api_gateway" {
+  source = "./da-terraform-modules/apigateway"
+  api_definition = templatefile("./templates/api_gateway/reference_generator.json.tpl", {
+    environment = local.hosting_environment
+    title       = "${upper(var.project)}ReferenceGenerator"
+    lambda_arn  = module.reference_generator_lambda.lambda_arn,
+  })
+  api_name    = "${upper(var.project)}ReferenceGenerator"
+  environment = local.hosting_environment
+  common_tags = local.hosting_common_tags
 }
