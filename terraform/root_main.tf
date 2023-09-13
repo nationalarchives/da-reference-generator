@@ -57,10 +57,10 @@ module "reference_generator_api_gateway" {
   source = "./da-terraform-modules/apigateway"
   api_definition = templatefile("./templates/api_gateway/reference_generator.json.tpl", {
     environment = local.hosting_environment
-    title       = "${upper(var.project)}ReferenceGenerator"
+    title       = local.reference_generator_api_gateway_name
     lambda_arn  = module.reference_generator_lambda.lambda_arn,
   })
-  api_name    = "${upper(var.project)}ReferenceGenerator"
+  api_name    = local.reference_generator_api_gateway_name
   environment = local.hosting_environment
   common_tags = local.hosting_common_tags
 }
