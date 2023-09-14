@@ -60,9 +60,9 @@ module "reference_generator_api_gateway" {
     title       = local.reference_generator_api_gateway_name
     lambda_arn  = module.reference_generator_lambda.lambda_arn,
   })
-  api_name        = local.reference_generator_api_gateway_name
-  environment     = local.hosting_environment
-  common_tags     = local.hosting_common_tags
+  api_name    = local.reference_generator_api_gateway_name
+  environment = local.hosting_environment
+  common_tags = local.hosting_common_tags
   api_rest_policy = templatefile("${path.module}/templates/api_gateway/reference_generator_rest_policy.json.tpl", {
     api_gateway_arn        = module.reference_generator_api_gateway.api_execution_arn
     api_task_role_arn      = local.api_task_role_arn
