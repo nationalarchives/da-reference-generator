@@ -15,4 +15,6 @@ locals {
   reference_generator_function_name    = "${var.project}-reference-generator-${local.hosting_environment}"
   reference_generator_api_gateway_name = "${upper(var.project)}ReferenceGenerator${local.hosting_environment}"
   reference_counter_table_name         = "${var.project}-reference-counter"
+  api_task_role_arn                    = module.terraform_config_hosting_project.terraform_config[local.hosting_environment]["api_task_role_arn"]
+  api_execution_role_arn               = module.terraform_config_hosting_project.terraform_config[local.hosting_environment]["api_execution_role_arn"]
 }
