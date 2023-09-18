@@ -10,7 +10,7 @@
         ]
       },
       "Action":"execute-api:Invoke",
-      "Resource":"${api_gateway_arn}"
+      "Resource":"${api_gateway_arn}/*"
     }
   ]
 }
