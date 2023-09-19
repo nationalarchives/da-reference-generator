@@ -17,15 +17,19 @@ import scala.util.{Failure, Success, Try}
 class Lambda extends RequestHandler[APIGatewayProxyRequestEvent, APIGatewayProxyResponseEvent] {
 
   override def handleRequest(event: APIGatewayProxyRequestEvent, context: Context): APIGatewayProxyResponseEvent = {
+    val limit = config.getString("dynamodb.referenceLimit").toInt
     val queryParams = event.getQueryStringParameters
     val queryParam: String = config.getString("dynamodb.queryParam")
-    val convertQueryToInt: Try[Int] = Try(queryParams.get(queryParam).toInt)
-    convertQueryToInt match {
+    val numberOfRefsQuery: Try[Int] = Try {
+      val numberOfRefs = queryParams.get(queryParam).toInt
+      if (numberOfRefs > limit) throw new IllegalArgumentException(s"$queryParam is greater than $limit") else numberOfRefs
+    }
+    numberOfRefsQuery match {
       case Success(numberOfReferences) =>
         process(Input(numberOfReferences))
       case Failure(exception) =>
         val response = new APIGatewayProxyResponseEvent()
-        logger.error(exception.getMessage)
+        logger.error(exception.toString)
         response.setStatusCode(500)
         response.setBody(exception.getMessage)
         response
