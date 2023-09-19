@@ -43,6 +43,7 @@ module "reference_generator_lambda" {
     REFERENCE_KEY_VALUE = "fileCounter"
     REFERENCE_COUNTER   = "referenceCounter"
     QUERY_PARAM         = "numberofrefs"
+    REFERENCE_LIMIT     = 5000
   }
   runtime         = "java11"
   timeout_seconds = 60
