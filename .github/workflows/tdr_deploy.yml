@@ -24,6 +24,7 @@ jobs:
       repo-name: da-reference-generator
       environment: ${{ github.event.inputs.environment }}
       working-directory: 'terraform'
+      update-tag: false
     secrets:
       MANAGEMENT_ACCOUNT: ${{ secrets.TDR_MANAGEMENT_ACCOUNT }}
       WORKFLOW_PAT: ${{ secrets.TDR_WORKFLOW_PAT }}
