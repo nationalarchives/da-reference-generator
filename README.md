@@ -9,15 +9,37 @@ The service consists of three main components:
 
 ## Lambda
 
-[TODO]
+The lambda contains the code for generating references.
+This Lambda function is triggered by an api gateway event and context object. It retrieves the current value of the counter from DynamoDB, increments it,
+and stores the updated value back in DynamoDB. It then generates a unique “reference” using the counter value. Finally, it returns the generated “references” json to the caller like so:
+`[
+"M3H5J",
+"M3H5K"
+]`
+
+A 500 response body will be returned if any issues occur when calling the Lambda for example 
+* numberofrefs exceeds the limit
+* numberofrefs parameter isn't an int
+* any dynamodb Exceptions (key not found, unable to update, etc)
 
 ## DynamoDb Table
 
-[TODO]
+The DynamoDb stores the current counter used for generating unique references. The DynamoDb is encrypted so that It cannot be directly modified via the AWS console or AWS CLI.
+Below is an example of what the table looks like:
+
+| v1          | referenceCounter |
+|-------------|------------------|
+| fileCounter | 6                |
+
 
 ## API Gateway
 
-[TODO]
+The API Gateway provides a RESTful interface to the Lambda function. 
+The urls for calling the reference generator can be obtained from the [da-terraform-configurations](https://github.com/nationalarchives/da-terraform-configurations/blob/main/tdr/main.tf#L35-L37)
+It can be called directly by providing the parameter `numberofrefs={value}` by making a http request to one of the reference generator urls, for example:
+`https://j8ezi9m4z0.execute-api.eu-west-2.amazonaws.com/intg/counter?numberofrefs=2`.
+
+The api gateway has a resource policy which restricts which services can call it.
 
 ## Deployment
 
@@ -57,8 +79,22 @@ The reference counter in the DynamoDb table needs to be manually seeded before t
 
 ### Terraform
 
-[TODO]
+The Terraform directory contains the Terraform code used to create the DynamoDb, Lambda and API Gateway resources.
+It relies on the `da-terraform-configurations` and `da-terraform-modules` projects.
 
-### Lambda Code
+1. Clone DA Terraform Configurations repository
 
-[TODO]
+   ```
+   [location of project] $ git clone https://github.com/nationalarchives/da-terraform-configurations.git
+   ```
+
+2. Clone DA Terraform Modules repository
+
+   ```
+   [location of project] $ git clone https://github.com/nationalarchives/da-terraform-modules.git
+   ```
+
+#### Apply Terraform 
+Commit and push all the changes made in the terraform directory to its GitHub repo, then (in the GitHub repo):
+
+Go the Actions tab -> Click ["Apply Terraform and deploy lambda"] -> Click "Run workflow" -> select the branch with the workflow file you want to use -> type the version to deploy -> Click the green "Run worklfow" button
