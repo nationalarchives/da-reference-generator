@@ -2,6 +2,8 @@
 
 Repository containing code for a self-contained service to generate unique "references" for records transferred to The National Archives (TNA).
 
+![](https://raw.githubusercontent.com/nationalarchives/tdr-dev-documentation/master/beta-architecture/diagrams/reference-generator.svg)
+
 The service consists of three main components:
 * *Lambda function*: the Lambda generates the "references" based on a incremented counter;
 * *DynamoDb Table*: the table contains the counter to generate the unique "references";
@@ -24,7 +26,7 @@ A 500 response body will be returned if any issues occur when calling the Lambda
 
 ## DynamoDb Table
 
-The DynamoDb stores the current counter used for generating unique references. The DynamoDb is encrypted so that It cannot be directly modified via the AWS console or AWS CLI.
+The DynamoDb stores the current counter used for generating unique references. The DynamoDb is encrypted so that it cannot be directly modified via the AWS console or AWS CLI.
 Below is an example of what the table looks like:
 
 | v1          | referenceCounter |
