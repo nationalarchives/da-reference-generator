@@ -2,6 +2,10 @@
 
 Repository containing code for a self-contained service to generate unique "references" for records transferred to The National Archives (TNA).
 
+## Reference Schema
+
+TBC
+
 ![](https://raw.githubusercontent.com/nationalarchives/tdr-dev-documentation/master/beta-architecture/diagrams/reference-generator.svg)
 
 The service consists of three main components:
@@ -24,6 +28,14 @@ A 500 response body will be returned if any issues occur when calling the Lambda
 * numberofrefs parameter isn't an int
 * any dynamodb Exceptions (key not found, unable to update, etc)
 
+The number of references that can be returned in a single call is limited, because:
+* prevention of single call using up all possible reference;
+* limits to the permitted size of the response.
+
+Calling clients will need to handle this limit by making more than a single call to retrieve the required number of references if it is greater than the limit.
+
+The limit is store here for use by calling clients: [reference_generator_limit](https://github.com/nationalarchives/da-terraform-configurations/blob/main/tdr/main.tf)
+
 ## DynamoDb Table
 
 The DynamoDb stores the current counter used for generating unique references. The DynamoDb is encrypted so that it cannot be directly modified via the AWS console or AWS CLI.
@@ -33,6 +45,13 @@ Below is an example of what the table looks like:
 |-------------|------------------|
 | fileCounter | 6                |
 
+### Security
+
+The DynamoDb is monitored by a specific set of Cloud Custodian rules:
+* `Reference-counter-table-kms-key-check`: Checks if reference counter table encrypted with specific KMS key.
+* `Reference-counter-table-pitr-check`: Checks that point in time recovery (PITR) is enabled for reference counter table
+
+Full details and code are here: [Reference counter custodian rules](https://github.com/nationalarchives/tna-custodian/tree/master/custodian/policies/dynamodb/reference-counter)
 
 ## API Gateway
 
@@ -42,6 +61,8 @@ It can be called directly by providing the parameter `numberofrefs={value}` by m
 `https://j8ezi9m4z0.execute-api.eu-west-2.amazonaws.com/intg/counter?numberofrefs=2`.
 
 The api gateway has a resource policy which restricts which services can call it.
+
+Any new calling clients will need to provide an AWS IAM role which can call the API Gateway and this needs to be added to the API Gateway resource policy.
 
 ## Deployment
 
@@ -100,3 +121,18 @@ It relies on the `da-terraform-configurations` and `da-terraform-modules` projec
 Commit and push all the changes made in the terraform directory to its GitHub repo, then (in the GitHub repo):
 
 Go the Actions tab -> Click ["Apply Terraform and deploy lambda"] -> Click "Run workflow" -> select the branch with the workflow file you want to use -> type the version to deploy -> Click the green "Run worklfow" button
+
+## Moving to new hosting project
+
+Should the reference generator service need to be moved to a different hosting project then the following steps will need to be taken:
+
+***NOTE*** Before the move the current counter value will need to be noted down to ensure the new DynamoDb table is seeded with the correct counter to prevent duplicate references
+
+* Add relevant Github Actions workflows for the new project to allow testing and deployment 
+* Update the [da-terraform-configurations](https://github.com/nationalarchives/da-terraform-configurations) repo with the new values for the reference generator service in the relevant project file:
+  * `reference_generator_limit`
+  * `reference_generator_intg_url` 
+  * `reference_generator_staging_url`
+  * `reference_generator_prod_url`
+* Ensure the Cloud Custodian rules are implemented for on the new hosting project: [DynamoDb > Security](#security)
+* Set up relevant GitHub actions in the new hosting project: [Deployment](#deployment)
