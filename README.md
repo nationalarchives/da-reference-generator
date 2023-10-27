@@ -2,10 +2,6 @@
 
 Repository containing code for a self-contained service to generate unique "references" for records transferred to The National Archives (TNA).
 
-## Reference Schema
-
-TBC
-
 ![](https://raw.githubusercontent.com/nationalarchives/tdr-dev-documentation/master/beta-architecture/diagrams/reference-generator.svg)
 
 The service consists of three main components:
@@ -29,10 +25,10 @@ A 500 response body will be returned if any issues occur when calling the Lambda
 * any dynamodb Exceptions (key not found, unable to update, etc)
 
 The number of references that can be returned in a single call is limited, because:
-* prevention of single call using up all possible reference;
+* prevent a single call using up all possible reference;
 * limits to the permitted size of the response.
 
-Calling clients will need to handle this limit by making more than a single call to retrieve the required number of references if it is greater than the limit.
+Calling clients will need to handle this limit by making multiple calls to retrieve the required number of references if it is greater than the limit.
 
 The limit is store here for use by calling clients: [reference_generator_limit](https://github.com/nationalarchives/da-terraform-configurations/blob/main/tdr/main.tf)
 
@@ -63,6 +59,10 @@ It can be called directly by providing the parameter `numberofrefs={value}` by m
 The api gateway has a resource policy which restricts which services can call it.
 
 Any new calling clients will need to provide an AWS IAM role which can call the API Gateway and this needs to be added to the API Gateway resource policy.
+
+## Reference Schema
+
+TBC
 
 ## Deployment
 
