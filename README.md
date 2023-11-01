@@ -25,12 +25,12 @@ A 500 response body will be returned if any issues occur when calling the Lambda
 * any dynamodb Exceptions (key not found, unable to update, etc)
 
 The number of references that can be returned in a single call is limited, because:
-* prevent a single call using up all possible reference;
+* prevent a single call using up all possible references;
 * limits to the permitted size of the response.
 
 Calling clients will need to handle this limit by making multiple calls to retrieve the required number of references if it is greater than the limit.
 
-The limit is store here for use by calling clients: [reference_generator_limit](https://github.com/nationalarchives/da-terraform-configurations/blob/main/tdr/main.tf)
+The limit is stored here for use by calling clients: [reference_generator_limit](https://github.com/nationalarchives/da-terraform-configurations/blob/main/tdr/main.tf)
 
 ## DynamoDb Table
 
