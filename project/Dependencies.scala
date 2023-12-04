@@ -9,7 +9,7 @@ object Dependencies {
   lazy val awsSdkDynamoDbV2 = "software.amazon.awssdk" % "dynamodb" % "2.21.36"
   lazy val awsSdkDynamoDbV1 = "com.amazonaws" % "aws-java-sdk-dynamodb" % "1.12.603"
   lazy val lambdaJavaCore = "com.amazonaws" % "aws-lambda-java-core" % "1.2.3"
-  lazy val lambdaJavaEvents = "com.amazonaws" % "aws-lambda-java-events" % "3.11.3"
+  lazy val lambdaJavaEvents = "com.amazonaws" % "aws-lambda-java-events" % "3.11.4"
   lazy val ocitools = "uk.gov.nationalarchives.oci" % "oci-tools-scala_2.13" % "0.3.0"
   lazy val circeCore = "io.circe" %% "circe-core" % circeVersion
   lazy val circeGeneric = "io.circe" %% "circe-generic" % circeVersion
