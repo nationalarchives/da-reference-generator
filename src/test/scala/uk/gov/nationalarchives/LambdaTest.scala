@@ -38,7 +38,7 @@ class LambdaTest extends AnyFlatSpec with Matchers with TestContainerUtils {
     val actual: APIGatewayProxyResponseEvent = lambda.process(input, client, config)
     val expected: APIGatewayProxyResponseEvent = new APIGatewayProxyResponseEvent()
       .withStatusCode(200)
-      .withBody("""["N","P","Q"]""")
+      .withBody("""["ZD","ZF","ZG"]""")
     actual shouldBe expected
   }
 
