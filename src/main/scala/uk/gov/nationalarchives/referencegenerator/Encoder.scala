@@ -9,10 +9,10 @@ object Encoder {
     case Right(alphabet) => alphabet
   }
   val baseNumber = 25
+  val referencePrefix = 'Z'
 
   def encode(counter: Long): String = {
     val alphabetIndices = BaseCoder.encode(counter, baseNumber)
-    val prefix = 'Z'
-    prefix +: Alphabet.toString(alphabet, alphabetIndices)
+    referencePrefix +: Alphabet.toString(alphabet, alphabetIndices)
   }
 }
