@@ -65,7 +65,7 @@ Any new calling clients will need to provide an AWS IAM role which can call the 
 The references generated are based on the CTDb52 algorithm which is hosted on [OCI tools scala](https://github.com/nationalarchives/oci-tools-scala/tree/main/src/main/resources/uk/gov/nationalarchives/oci).
 Every reference generated will have 'Z' prefixed to it, for example ["ZD4G25","ZD4G26"].
 
-The last permitted reference that should be used should be: "WWWWWWW" which corresponds to counter value 6103515624.
+The last permitted reference that should be used is: "WWWWWWW" which corresponds to counter value 6103515624.
 
 ## Deployment
 
