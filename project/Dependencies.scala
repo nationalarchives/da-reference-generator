@@ -5,8 +5,8 @@ object Dependencies {
   private val circeVersion = "0.14.6"
   private val testContainersVersion = "0.41.2"
 
-  lazy val scalaTest = "org.scalatest" %% "scalatest" % "3.2.17"
-  lazy val awsSdkDynamoDbV2 = "software.amazon.awssdk" % "dynamodb" % "2.23.17"
+  lazy val scalaTest = "org.scalatest" %% "scalatest" % "3.2.18"
+  lazy val awsSdkDynamoDbV2 = "software.amazon.awssdk" % "dynamodb" % "2.23.21"
   lazy val awsSdkDynamoDbV1 = "com.amazonaws" % "aws-java-sdk-dynamodb" % "1.12.656"
   lazy val lambdaJavaCore = "com.amazonaws" % "aws-lambda-java-core" % "1.2.3"
   lazy val lambdaJavaEvents = "com.amazonaws" % "aws-lambda-java-events" % "3.11.4"
