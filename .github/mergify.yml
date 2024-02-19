@@ -1,12 +1,14 @@
 queue_rules:
   - name: default
     conditions:
-      - "check-success=test / test"
+      - "check-success=Check terraform / terraform-check"
+      - "check-success=Lambda test / test"
 pull_request_rules:
   - name: automatic merge for Scala Steward
     conditions:
       - author=tna-digital-archiving-jenkins
-      - "check-success=test / test"
+      - "check-success=Check terraform / terraform-check"
+      - "check-success=Lambda test / test"
       - or:
           - files=build.sbt
           - files~=^(!?project/)
