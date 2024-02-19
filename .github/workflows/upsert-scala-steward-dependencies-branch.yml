@@ -2,13 +2,13 @@ name: Upsert `scala-steward-dependencies` branch
 
 on:
   push:
-    branches: master
+    branches: main
 
 jobs:
   upsert-develop-branch:
     permissions: write-all
     runs-on: ubuntu-latest
-    name: Rebase `scala-steward-dependencies` branch to latest `origin/master`
+    name: Rebase `scala-steward-dependencies` branch to latest `origin/main`
     steps:
       - name: Checkout develop branch
         uses: actions/checkout@v2
@@ -19,5 +19,5 @@ jobs:
         run: |
             git config user.email digitalpreservation@nationalarchives.gov.uk
             git config user.name tna-digital-archiving-jenkins
-            git rebase origin/master
+            git rebase origin/main
             git push -f -u origin scala-steward-dependencies
