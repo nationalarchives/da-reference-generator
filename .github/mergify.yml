@@ -15,6 +15,6 @@ pull_request_rules:
     actions:
       review:
         type: APPROVE
-        message: Automatically approving Scala Steward
+        message: Automatically approving Scala Steward updates
       queue:
         name: default

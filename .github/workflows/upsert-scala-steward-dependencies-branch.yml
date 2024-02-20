@@ -3,7 +3,6 @@ name: Upsert `scala-steward-dependencies` branch
 on:
   push:
     branches: main
-
 jobs:
   upsert-develop-branch:
     permissions: write-all
