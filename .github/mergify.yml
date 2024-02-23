@@ -3,12 +3,14 @@ queue_rules:
     conditions:
       - "check-success=Check terraform / terraform-check"
       - "check-success=Lambda test / test"
+      - "check-success=security/snyk (nationalarchives)"
 pull_request_rules:
   - name: automatic merge for Scala Steward
     conditions:
       - author=tna-digital-archiving-jenkins
       - "check-success=Check terraform / terraform-check"
       - "check-success=Lambda test / test"
+      - "check-success=security/snyk (nationalarchives)"
       - or:
           - files=build.sbt
           - files~=^(!?project/)
