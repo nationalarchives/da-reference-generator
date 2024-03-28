@@ -18,9 +18,14 @@ module "dynamodb_kms_key" {
   key_name = "${var.project}-reference-counter-key-${local.hosting_environment}"
   tags     = local.hosting_common_tags
   default_policy_variables = {
-    user_roles    = [module.reference_generator_lambda.lambda_role_arn]
-    ci_roles      = [local.hosting_assume_role]
-    service_names = ["cloudwatch"]
+    user_roles = [module.reference_generator_lambda.lambda_role_arn]
+    ci_roles   = [local.hosting_assume_role]
+    service_details = [
+      {
+        service_name : "cloudwatch"
+        service_source_account : data.aws_caller_identity.current.account_id
+      }
+    ]
   }
 }
 
