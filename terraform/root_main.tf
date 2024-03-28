@@ -71,7 +71,7 @@ module "reference_generator_api_gateway" {
   })
   api_method_settings = [{
     method_path        = "*/*"
-    logging_level      = "ERROR",
+    logging_level      = "INFO",
     metrics_enabled    = false,
     data_trace_enabled = false
   }]
