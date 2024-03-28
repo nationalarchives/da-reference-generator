@@ -69,4 +69,10 @@ module "reference_generator_api_gateway" {
     api_task_role_arn      = local.api_task_role_arn
     api_execution_role_arn = local.api_execution_role_arn
   })
+  api_method_settings = [{
+    method_path        = "*/*"
+    logging_level      = "ERROR",
+    metrics_enabled    = false,
+    data_trace_enabled = false
+  }]
 }
