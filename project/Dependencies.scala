@@ -7,7 +7,7 @@ object Dependencies {
 
   lazy val scalaTest = "org.scalatest" %% "scalatest" % "3.2.18"
   lazy val awsSdkDynamoDbV2 = "software.amazon.awssdk" % "dynamodb" % "2.25.26"
-  lazy val awsSdkDynamoDbV1 = "com.amazonaws" % "aws-java-sdk-dynamodb" % "1.12.694"
+  lazy val awsSdkDynamoDbV1 = "com.amazonaws" % "aws-java-sdk-dynamodb" % "1.12.696"
   lazy val lambdaJavaCore = "com.amazonaws" % "aws-lambda-java-core" % "1.2.3"
   lazy val lambdaJavaEvents = "com.amazonaws" % "aws-lambda-java-events" % "3.11.4"
   lazy val ocitools = "uk.gov.nationalarchives.oci" % "oci-tools-scala_2.13" % "0.4.0"
