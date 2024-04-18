@@ -14,6 +14,7 @@ on:
       to-deploy:
         description: 'Version to deploy'
         required: true
+run-name: Apply Terraform and Deploying Reference Generator ${{inputs.to-deploy}} to ${{inputs.environment}}        
 permissions:
   id-token: write
   contents: write
