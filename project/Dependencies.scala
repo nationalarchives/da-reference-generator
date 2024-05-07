@@ -2,12 +2,12 @@ import sbt._
 
 object Dependencies {
 
-  private val circeVersion = "0.14.6"
+  private val circeVersion = "0.14.7"
   private val testContainersVersion = "0.41.3"
 
   lazy val scalaTest = "org.scalatest" %% "scalatest" % "3.2.18"
-  lazy val awsSdkDynamoDbV1 = "com.amazonaws" % "aws-java-sdk-dynamodb" % "1.12.705"
-  lazy val awsSdkDynamoDbV2 = "software.amazon.awssdk" % "dynamodb" % "2.25.35"
+  lazy val awsSdkDynamoDbV1 = "com.amazonaws" % "aws-java-sdk-dynamodb" % "1.12.715"
+  lazy val awsSdkDynamoDbV2 = "software.amazon.awssdk" % "dynamodb" % "2.25.45"
   lazy val lambdaJavaCore = "com.amazonaws" % "aws-lambda-java-core" % "1.2.3"
   lazy val lambdaJavaEvents = "com.amazonaws" % "aws-lambda-java-events" % "3.11.5"
   lazy val ocitools = "uk.gov.nationalarchives.oci" % "oci-tools-scala_2.13" % "0.4.0"
