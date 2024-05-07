@@ -12,7 +12,6 @@ import io.circe.syntax._
 import software.amazon.awssdk.http.SdkHttpClient
 import software.amazon.awssdk.http.apache.ApacheHttpClient
 
-import scala.annotation.tailrec
 import scala.util.{Failure, Success, Try}
 
 class Lambda extends RequestHandler[APIGatewayProxyRequestEvent, APIGatewayProxyResponseEvent] {
@@ -37,58 +36,23 @@ class Lambda extends RequestHandler[APIGatewayProxyRequestEvent, APIGatewayProxy
     }
   }
 
-  //  def process(input: Input, counterClient: DynamoDbClient = counterClient, config: Config = config): APIGatewayProxyResponseEvent = {
-  //    val counter = new Counter(counterClient, config)
-  //    val response = new APIGatewayProxyResponseEvent()
-  //    counter.incrementCounter(input.numberOfReferences) match {
-  //      case Success(currentCounter) =>
-  //        val references = generateReferences(currentCounter.toInt, input.numberOfReferences).asJson.noSpaces
-  //        logger.info(s"Generated the following references: $references")
-  //        response.setStatusCode(200)
-  //        response.setBody(references)
-  //        response
-  //      case Failure(exception) =>
-  //        logger.error(exception.getMessage)
-  //        response.setStatusCode(500)
-  //        response.setBody(exception.getMessage)
-  //        response
-  //    }
-  //  }
-
-  def process(input: Input, counterClient: DynamoDbClient = counterClient, config: Config = config): APIGatewayProxyResponseEvent = {
-    val response = new APIGatewayProxyResponseEvent()
-    val counter = new Counter(counterClient, config)
-
-    @tailrec
-    def attemptIncrement(retriesLeft: Int): Try[String] = {
-      // Attempt to increment the counter
+    def process(input: Input, counterClient: DynamoDbClient = counterClient, config: Config = config): APIGatewayProxyResponseEvent = {
+      val counter = new Counter(counterClient, config)
+      val response = new APIGatewayProxyResponseEvent()
       counter.incrementCounter(input.numberOfReferences) match {
-        case success@Success(_) => success
-        case failure@Failure(_) if retriesLeft > 0 =>
-          logger.error(s"Attempt failed, retries left: $retriesLeft")
-          // Recursive call with one less retry left
-          attemptIncrement(retriesLeft - 1)
-        case failure => failure
+        case Success(currentCounter) =>
+          val references = generateReferences(currentCounter.toInt, input.numberOfReferences).asJson.noSpaces
+          logger.info(s"Generated the following references: $references")
+          response.setStatusCode(200)
+          response.setBody(references)
+          response
+        case Failure(exception) =>
+          logger.error(exception.getMessage)
+          response.setStatusCode(500)
+          response.setBody(exception.getMessage)
+          response
       }
     }
-
-    val numberOfRetries = 3
-    val result = attemptIncrement(numberOfRetries)
-
-    result match {
-      case Success(currentCounter) =>
-        val references = generateReferences(currentCounter.toInt, input.numberOfReferences).asJson.noSpaces
-        logger.info(s"Generated the following references: $references")
-        response.setStatusCode(200)
-        response.setBody(references)
-        response
-      case Failure(exception) =>
-        logger.error(s"All retries failed: ${exception.getMessage}")
-        response.setStatusCode(500)
-        response.setBody(exception.getMessage)
-        response
-    }
-  }
 
   private def generateReferences(currentCounter: Int, count: Int): List[String] = {
     (currentCounter until currentCounter + count).map(cc => Reference(Encoder.encode(cc.toLong)).reference).toList
