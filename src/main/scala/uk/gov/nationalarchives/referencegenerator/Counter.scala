@@ -6,8 +6,9 @@ import software.amazon.awssdk.services.dynamodb.DynamoDbClient
 import software.amazon.awssdk.services.dynamodb.model.{AttributeValue, GetItemRequest, ReturnValue, UpdateItemRequest}
 
 import java.util
+import scala.annotation.tailrec
 import scala.jdk.CollectionConverters.{MapHasAsJava, MapHasAsScala}
-import scala.util.Try
+import scala.util.{Failure, Success, Try}
 
 class Counter(counterClient: DynamoDbClient, config: Config) {
   val logger: Logger = Logger[Counter]
@@ -43,17 +44,26 @@ class Counter(counterClient: DynamoDbClient, config: Config) {
     .build()
 
   def incrementCounter(numberOfReferences: Int): Try[String] = {
-    Try {
-      val currentCounterResponse: Map[String, AttributeValue] = counterClient.getItem(currentCountRequest).item.asScala.toMap
-
-      if (currentCounterResponse.nonEmpty) {
+    val numberOfRetries = config.getInt("dynamodb.referenceRetries")
+    @tailrec
+    def attemptUpdate(attemptsLeft: Int): Try[String] = {
+      Try {
+        val currentCounterResponse: Map[String, AttributeValue] = counterClient.getItem(currentCountRequest).item.asScala.toMap
         val currentCounter = currentCounterResponse(referenceCounter).n()
         counterClient.updateItem(incrementCounterRequest(currentCounter, numberOfReferences))
-        logger.info(s"The counter value $currentCounter has been updated by $numberOfReferences")
         currentCounter
-      } else {
-        throw new NoSuchElementException(s"No item found with the key: $key")
+      } match {
+        case currentCounter: Success[String] =>
+          logger.info(s"The counter value $currentCounter has been updated by $numberOfReferences")
+          currentCounter
+        case _: Failure[_] if attemptsLeft > 0 =>
+          logger.warn(s"Update failed, attempts left: $attemptsLeft")
+          attemptUpdate(attemptsLeft - 1)
+        case Failure(exception) =>
+          logger.error("Update failed after maximum retries")
+          Failure(new Exception(s"Update failed after maximum retries. Last error: ${exception.getMessage}"))
       }
     }
+    attemptUpdate(attemptsLeft = numberOfRetries)
   }
 }

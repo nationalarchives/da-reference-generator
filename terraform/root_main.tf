@@ -49,6 +49,7 @@ module "reference_generator_lambda" {
     REFERENCE_COUNTER   = "referenceCounter"
     QUERY_PARAM         = "numberofrefs"
     REFERENCE_LIMIT     = local.reference_generator_limit
+    REFERENCE_RETRIES   = local.reference_generator_retries
   }
   runtime         = "java11"
   timeout_seconds = 60
