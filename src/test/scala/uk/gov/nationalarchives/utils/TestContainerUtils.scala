@@ -48,7 +48,7 @@ trait TestContainerUtils extends AnyFlatSpec with TestContainerForAll with Befor
   def config: Config
 
   override val containerDef: ContainerDef = DynaliteContainer.Def(
-    dockerImageName = DockerImageName.parse("quay.io/testcontainers/dynalite:v1.2.1-1")
+    dockerImageName = DockerImageName.parse("tenzer/dynalite").asCompatibleSubstituteFor("quay.io/testcontainers/dynalite")
   )
 
   override def afterContainersStart(containers: containerDef.Container): Unit = {

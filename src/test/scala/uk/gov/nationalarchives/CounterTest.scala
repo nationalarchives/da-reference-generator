@@ -28,7 +28,7 @@ class CounterTest extends AnyFlatSpec with Matchers with TestContainerUtils {
     val response = counter.incrementCounter(1)
 
     response shouldBe a[Failure[_]]
-    response.failed.get shouldBe an[DynamoDbException]
+    response.failed.get shouldBe an[Exception]
     response.failed.get.getMessage should include("The provided key element does not match the schema")
   }
 
@@ -38,7 +38,7 @@ class CounterTest extends AnyFlatSpec with Matchers with TestContainerUtils {
     val response = counter.incrementCounter(-1)
 
     response shouldBe a[Failure[_]]
-    response.failed.get shouldBe an[DynamoDbException]
+    response.failed.get shouldBe an[Exception]
     response.failed.get.getMessage should include("The conditional request failed")
   }
 
@@ -48,7 +48,7 @@ class CounterTest extends AnyFlatSpec with Matchers with TestContainerUtils {
     val response = counter.incrementCounter(0)
 
     response shouldBe a[Failure[_]]
-    response.failed.get shouldBe an[DynamoDbException]
+    response.failed.get shouldBe an[Exception]
     response.failed.get.getMessage should include("The conditional request failed")
   }
 
@@ -65,7 +65,7 @@ class CounterTest extends AnyFlatSpec with Matchers with TestContainerUtils {
     val client = createDynamoDbClient(container)
     val counter = new Counter(client, config)
 
-    val concurrentUpdates = 4
+    val concurrentUpdates = 10
     val futures = (1 to concurrentUpdates).map(_ => Future {
       counter.incrementCounter(1)
     })
@@ -75,5 +75,15 @@ class CounterTest extends AnyFlatSpec with Matchers with TestContainerUtils {
 
     assert(results._1.head.get.nonEmpty)
     results._2.head.failed.get.getMessage should include("The conditional request failed")
+  }
+
+  "incrementCounter" should "return an exception if the maximum retries have been exhausted" in withContainers { case container: DynaliteContainer =>
+    val client = createDynamoDbClient(container)
+    val counter = new Counter(client, config)
+    val response = counter.incrementCounter(-1)
+
+    response shouldBe a[Failure[_]]
+    response.failed.get shouldBe an[Exception]
+    response.failed.get.getMessage should include("Update failed after maximum retries. Last error: The conditional request failed")
   }
 }
