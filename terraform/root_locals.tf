@@ -17,7 +17,5 @@ locals {
   reference_counter_table_name         = "${var.project}-reference-counter"
   reference_generator_retries          = 2
   reference_generator_limit            = module.terraform_config_hosting_project.terraform_config["reference_generator_limit"]
-  api_task_role_arn                    = module.terraform_config_hosting_project.terraform_config[local.hosting_environment]["api_task_role_arn"]
-  api_execution_role_arn               = module.terraform_config_hosting_project.terraform_config[local.hosting_environment]["api_execution_role_arn"]
   tdr_vpc_public_ip                    = module.terraform_config_hosting_project.terraform_config["${local.hosting_environment}_ip_public"]
 }
