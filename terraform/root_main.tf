@@ -71,7 +71,7 @@ module "reference_generator_api_gateway" {
   environment = local.hosting_environment
   common_tags = local.hosting_common_tags
   api_rest_policy = templatefile("${path.module}/templates/api_gateway/reference_generator_rest_policy.json.tpl", {
-    api_gateway_arn = module.reference_generator_api_gateway.api_execution_arn
+    api_gateway_arn   = module.reference_generator_api_gateway.api_execution_arn
     tdr_vpc_public_ip = jsonencode(local.tdr_vpc_public_ip)
   })
   api_method_settings = [{
