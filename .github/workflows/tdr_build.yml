@@ -5,8 +5,9 @@ on:
       - main
 jobs:
   pre-deploy:
-    uses: nationalarchives/tdr-github-actions/.github/workflows/lambda_build.yml@main
+    uses: nationalarchives/tdr-github-actions/.github/workflows/lambda_build.yml@new-lambda-s3-structure
     with:
+      lambda-name: reference-generator
       repo-name: da-reference-generator
       artifact-name: reference-generator
       build-command: |
@@ -19,7 +20,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3
-      - run: gh workflow run tdr_deploy.yml -f environment=intg -f to-deploy=${{ needs.pre-deploy.outputs.next-version }}
+      - run: gh workflow run tdr_deploy.yml --ref TDRD-666 -f environment=intg -f to-deploy=${{ needs.pre-deploy.outputs.next-version }}
         env:
           GITHUB_TOKEN: ${{ secrets.TDR_WORKFLOW_PAT }}
 
