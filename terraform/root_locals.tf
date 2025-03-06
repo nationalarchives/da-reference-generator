@@ -18,4 +18,5 @@ locals {
   reference_generator_retries          = 2
   reference_generator_limit            = module.terraform_config_hosting_project.terraform_config["reference_generator_limit"]
   tdr_vpc_public_ip                    = module.terraform_config_hosting_project.terraform_config["${local.hosting_environment}_ip_public"]
+  wiz_role_arns                        = module.terraform_config_hosting_project.terraform_config[local.hosting_environment]["wiz_role_arns"]
 }
