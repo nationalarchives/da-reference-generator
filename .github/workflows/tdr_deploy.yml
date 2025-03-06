@@ -36,7 +36,7 @@ jobs:
       PROD_ACCOUNT_NUMBER: ${{ secrets.TDR_PROD_ACCOUNT_NUMBER }}
   deploy:
     needs: apply
-    uses: nationalarchives/tdr-github-actions/.github/workflows/lambda_deploy.yml@new-lambda-s3-structure
+    uses: nationalarchives/tdr-github-actions/.github/workflows/lambda_deploy.yml@main
     with:
       lambda-name: reference-generator
       deployment-package: reference-generator.jar
