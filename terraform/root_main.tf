@@ -3,6 +3,11 @@ module "terraform_config_hosting_project" {
   project = var.hosting_project
 }
 
+module "aws_backup_terraform_config" {
+  source  = "./da-terraform-configurations/"
+  project = "aws-backup"
+}
+
 module "dynamodb" {
   source                         = "./da-terraform-modules/dynamo"
   table_name                     = local.reference_counter_table_name
@@ -11,6 +16,7 @@ module "dynamodb" {
   server_side_encryption_enabled = true
   kms_key_arn                    = module.dynamodb_kms_key.kms_key_arn
   point_in_time_recovery_enabled = true
+  common_tags                    = merge(local.hosting_common_tags, local.aws_backup_tag)
 }
 
 module "dynamodb_kms_key" {
@@ -18,7 +24,7 @@ module "dynamodb_kms_key" {
   key_name = "${var.project}-reference-counter-key-${local.hosting_environment}"
   tags     = local.hosting_common_tags
   default_policy_variables = {
-    user_roles = [module.reference_generator_lambda.lambda_role_arn]
+    user_roles = concat([module.reference_generator_lambda.lambda_role_arn], local.aws_backup_roles)
     ci_roles   = [local.hosting_assume_role]
     service_details = [
       {
