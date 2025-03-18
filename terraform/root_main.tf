@@ -26,7 +26,7 @@ module "dynamodb_kms_key" {
         service_source_account : data.aws_caller_identity.current.account_id
       }
     ]
-    wiz_role = local.wiz_role_arns
+    wiz_roles = local.wiz_role_arns
   }
 }
 
