@@ -26,6 +26,8 @@ lazy val root = (project in file("."))
     )
   )
 
+dependencyOverrides += "commons-logging" % "commons-logging" % "1.3.5"
+
 (assembly / assemblyJarName) := "reference-generator.jar"
 
 (assembly / assemblyMergeStrategy) := {
