@@ -20,23 +20,7 @@ permissions:
   id-token: write
   contents: write
 jobs:
-  apply:
-    uses: nationalarchives/tdr-github-actions/.github/workflows/terraform_apply.yml@main
-    with:
-      repo-name: da-reference-generator
-      environment: ${{ github.event.inputs.environment }}
-      working-directory: 'terraform'
-      update-tag: false
-    secrets:
-      MANAGEMENT_ACCOUNT: ${{ secrets.TDR_MANAGEMENT_ACCOUNT }}
-      WORKFLOW_PAT: ${{ secrets.TDR_WORKFLOW_PAT }}
-      ACCOUNT_NUMBER: ${{ secrets.TDR_ACCOUNT_NUMBER }}
-      SLACK_WEBHOOK: ${{ secrets.TDR_SLACK_WEBHOOK }}
-      INTG_ACCOUNT_NUMBER: ${{ secrets.TDR_INTG_ACCOUNT_NUMBER }}
-      STAGING_ACCOUNT_NUMBER: ${{ secrets.TDR_STAGING_ACCOUNT_NUMBER }}
-      PROD_ACCOUNT_NUMBER: ${{ secrets.TDR_PROD_ACCOUNT_NUMBER }}
   deploy:
-    needs: apply
     uses: nationalarchives/tdr-github-actions/.github/workflows/lambda_deploy.yml@main
     with:
       lambda-name: reference-generator
