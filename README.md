@@ -41,14 +41,6 @@ Below is an example of what the table looks like:
 |-------------|------------------|
 | fileCounter | 6                |
 
-### Security
-
-The DynamoDb is monitored by a specific set of Cloud Custodian rules:
-* `Reference-counter-table-kms-key-check`: Checks if reference counter table encrypted with specific KMS key.
-* `Reference-counter-table-pitr-check`: Checks that point in time recovery (PITR) is enabled for reference counter table
-
-Full details and code are here: [Reference counter custodian rules](https://github.com/nationalarchives/tna-custodian/tree/master/custodian/policies/dynamodb/reference-counter)
-
 ## API Gateway
 
 The API Gateway provides a RESTful interface to the Lambda function. 
