@@ -13,7 +13,7 @@ jobs:
     name: Check terraform
     uses: nationalarchives/tdr-github-actions/.github/workflows/terraform_check.yml@main
     with:
-      terraform-version: '1.9.8'
+      terraform-version: 1.12.2
       working-directory: terraform
     secrets:
       MANAGEMENT_ACCOUNT: ${{ secrets.TDR_MANAGEMENT_ACCOUNT }}
