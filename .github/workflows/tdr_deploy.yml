@@ -26,6 +26,7 @@ jobs:
       environment: ${{ github.event.inputs.environment }}
       working-directory: 'terraform'
       update-tag: false
+      terraform-version: 1.12.2
     secrets:
       MANAGEMENT_ACCOUNT: ${{ secrets.TDR_MANAGEMENT_ACCOUNT }}
       WORKFLOW_PAT: ${{ secrets.TDR_WORKFLOW_PAT }}
