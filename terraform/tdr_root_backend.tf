@@ -4,6 +4,6 @@ terraform {
     key            = "reference-generator.state"
     region         = "eu-west-2"
     encrypt        = true
-    dynamodb_table = "tdr-terraform-state-lock"
+    use_lockfile   = true
   }
 }
