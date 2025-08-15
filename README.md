@@ -43,14 +43,19 @@ Below is an example of what the table looks like:
 
 ## API Gateway
 
-The API Gateway provides a RESTful interface to the Lambda function. 
+There are two REST API Gateways that provides an interface to the Lambda function. 
+
+One is a public and the other private.  Both consume the same Lambda.
+
+Currently, the private API is called from within TNA.  The public API is used by TDR.
+
 The urls for calling the reference generator can be obtained from the [da-terraform-configurations](https://github.com/nationalarchives/da-terraform-configurations/blob/main/tdr/main.tf#L35-L37)
 It can be called directly by providing the parameter `numberofrefs={value}` by making a http request to one of the reference generator urls, for example:
 `https://j8ezi9m4z0.execute-api.eu-west-2.amazonaws.com/intg/counter?numberofrefs=2`.
 
 The api gateway has a resource policy which restricts which services can call it.
 
-Any new calling clients will need to provide an AWS IAM role which can call the API Gateway and this needs to be added to the API Gateway resource policy.
+Any new calling clients will need to provide an AWS IAM role or VPCE id which should then be added to the corresponding API Gateway resource policy.
 
 ## Reference Schema
 
