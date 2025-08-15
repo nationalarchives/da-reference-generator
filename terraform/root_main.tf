@@ -3,6 +3,10 @@ module "terraform_config_hosting_project" {
   project = var.hosting_project
 }
 
+module "shared_configurations_talend" {
+  source = "./da-terraform-configurations/talend"
+}
+
 module "aws_backup_terraform_config" {
   source  = "./da-terraform-configurations/"
   project = "aws-backup"
@@ -87,4 +91,49 @@ module "reference_generator_api_gateway" {
     metrics_enabled    = false,
     data_trace_enabled = false
   }]
+}
+
+locals {
+  allowed_vpces_tdr = {
+    intg = [
+      "${module.shared_configurations_talend.config.dev.api_gateway_vpce}",
+      "${module.shared_configurations_talend.config.intg.api_gateway_vpce}"
+    ]
+    staging = ["${module.shared_configurations_talend.config.staging.api_gateway_vpce}"]
+    prod    = ["${module.shared_configurations_talend.config.prod.api_gateway_vpce}"]
+  }
+}
+
+module "reference_generator_api_gateway_private" {
+  source                 = "./da-terraform-modules/apigateway"
+  endpoint_configuration = { "types" : ["PRIVATE"] }
+  api_definition = templatefile("./templates/api_gateway/reference_generator.json.tpl", {
+    environment = local.hosting_environment
+    title       = format("%s-%s", local.reference_generator_api_gateway_name, "private")
+    lambda_arn  = module.reference_generator_lambda.lambda_arn,
+  })
+  api_name    = format("%s-%s", local.reference_generator_api_gateway_name, "private")
+  environment = local.hosting_environment
+  common_tags = local.hosting_common_tags
+  api_rest_policy = templatefile("${path.module}/templates/api_gateway/reference_generator_rest_policy_private.json.tpl", {
+    api_gateway_arn = module.reference_generator_api_gateway_private.api_execution_arn
+
+    allowed_vpces = jsonencode(local.allowed_vpces_tdr[local.hosting_environment])
+  })
+  api_method_settings = [{
+    method_path        = "*/*"
+    logging_level      = "INFO",
+    metrics_enabled    = false,
+    data_trace_enabled = false
+  }]
+}
+
+# The da-terraform-modules/lambda can only accept a map so duplicate principal names are not possible
+# Add the permission just for the private API
+resource "aws_lambda_permission" "lambda_permissions" {
+  statement_id  = "AllowExecutionFromApigatewayPrivate"
+  action        = "lambda:InvokeFunction"
+  function_name = module.reference_generator_lambda.lambda_function.function_name
+  principal     = "apigateway.amazonaws.com"
+  source_arn    = "${module.reference_generator_api_gateway_private.api_execution_arn}/*/GET/counter"
 }
