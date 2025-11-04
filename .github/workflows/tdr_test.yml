@@ -11,7 +11,7 @@ permissions:
 jobs:
   check:
     name: Check terraform
-    uses: nationalarchives/tdr-github-actions/.github/workflows/terraform_check.yml@288052e0133a47d2f12924edc2bc5553c1b2d73a # v0.0.5
+    uses: nationalarchives/tdr-github-actions/.github/workflows/terraform_check.yml@1c56dd1e838340ab53c7dc55dbbb974a062a6ae9 # v0.0.6
     with:
       terraform-version: 1.12.2
       working-directory: terraform
@@ -20,7 +20,7 @@ jobs:
       WORKFLOW_PAT: ${{ secrets.TDR_WORKFLOW_PAT }}
   test:
     name: Lambda test
-    uses: nationalarchives/tdr-github-actions/.github/workflows/tdr_test.yml@288052e0133a47d2f12924edc2bc5553c1b2d73a # v0.0.5
+    uses: nationalarchives/tdr-github-actions/.github/workflows/tdr_test.yml@1c56dd1e838340ab53c7dc55dbbb974a062a6ae9 # v0.0.6
     with:
       repo-name: da-reference-generator
       test-command: |
