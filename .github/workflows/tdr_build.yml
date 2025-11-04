@@ -8,7 +8,7 @@ jobs:
     uses: nationalarchives/tdr-github-actions/.github/workflows/lambda_build.yml@288052e0133a47d2f12924edc2bc5553c1b2d73a # v0.0.5
     with:
       lambda-name: reference-generator
-      repo-name: da-reference-generators
+      repo-name: da-reference-generator
       artifact-name: reference-generator
       build-command: |
         sbt assembly
