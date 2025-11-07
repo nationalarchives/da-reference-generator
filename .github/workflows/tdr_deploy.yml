@@ -20,7 +20,7 @@ permissions:
   contents: write
 jobs:
   apply:
-    uses: nationalarchives/tdr-github-actions/.github/workflows/terraform_apply.yml@main
+    uses: nationalarchives/tdr-github-actions/.github/workflows/terraform_apply.yml@1c56dd1e838340ab53c7dc55dbbb974a062a6ae9 # v0.0.6
     with:
       repo-name: da-reference-generator
       environment: ${{ github.event.inputs.environment }}
@@ -37,7 +37,7 @@ jobs:
       PROD_ACCOUNT_NUMBER: ${{ secrets.TDR_PROD_ACCOUNT_NUMBER }}
   deploy:
     needs: apply
-    uses: nationalarchives/tdr-github-actions/.github/workflows/lambda_deploy.yml@main
+    uses: nationalarchives/tdr-github-actions/.github/workflows/lambda_deploy.yml@1c56dd1e838340ab53c7dc55dbbb974a062a6ae9 # v0.0.6
     with:
       lambda-name: reference-generator
       deployment-package: reference-generator.jar
