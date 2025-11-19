@@ -20,7 +20,7 @@ jobs:
       WORKFLOW_PAT: ${{ secrets.TDR_WORKFLOW_PAT }}
   test:
     name: Lambda test
-    uses: nationalarchives/tdr-github-actions/.github/workflows/tdr_test.yml@1c56dd1e838340ab53c7dc55dbbb974a062a6ae9 # v0.0.6
+    uses: nationalarchives/tdr-github-actions/.github/workflows/tdr_test.yml@f4766d435f6a5fbcf8ebbf64020b208c04ac2a2f # v0.0.9
     with:
       repo-name: da-reference-generator
       test-command: |
