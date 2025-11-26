@@ -63,7 +63,7 @@ module "reference_generator_lambda" {
     REFERENCE_LIMIT     = local.reference_generator_limit
     REFERENCE_RETRIES   = local.reference_generator_retries
   }
-  runtime         = "java11"
+  runtime         = "java17"
   timeout_seconds = 60
   memory_size     = 1024
   tags            = local.hosting_common_tags
