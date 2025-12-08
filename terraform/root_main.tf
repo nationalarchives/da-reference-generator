@@ -28,8 +28,9 @@ module "dynamodb_kms_key" {
   key_name = "${var.project}-reference-counter-key-${local.hosting_environment}"
   tags     = local.hosting_common_tags
   default_policy_variables = {
-    user_roles = concat([module.reference_generator_lambda.lambda_role_arn], local.aws_backup_roles)
-    ci_roles   = [local.hosting_assume_role]
+    user_roles           = [module.reference_generator_lambda.lambda_role_arn]
+    user_roles_decoupled = local.aws_backup_roles
+    ci_roles             = [local.hosting_assume_role]
     service_details = [
       {
         service_name : "cloudwatch"
@@ -62,7 +63,7 @@ module "reference_generator_lambda" {
     REFERENCE_LIMIT     = local.reference_generator_limit
     REFERENCE_RETRIES   = local.reference_generator_retries
   }
-  runtime         = "java11"
+  runtime         = "java17"
   timeout_seconds = 60
   memory_size     = 1024
   tags            = local.hosting_common_tags
