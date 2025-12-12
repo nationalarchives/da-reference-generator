@@ -10,6 +10,7 @@ jobs:
       lambda-name: reference-generator
       repo-name: da-reference-generator
       artifact-name: reference-generator
+      java-version: '17'
       build-command: |
         sbt assembly
     secrets:
