@@ -19,5 +19,5 @@ object Dependencies {
   lazy val logstash = "net.logstash.logback" % "logstash-logback-encoder" % "9.0"
   lazy val typesafe = "com.typesafe" % "config" % "1.4.5"
   lazy val testContainer = "com.dimafeng" %% "testcontainers-scala-scalatest" % testContainersVersion
-  lazy val testContainerDynalite = "com.dimafeng" %% "testcontainers-scala-dynalite" % testContainersVersion
+  lazy val testContainerDynalite = "com.dimafeng" %% "testcontainers-scala-dynalite" "0.43.6"
 }
