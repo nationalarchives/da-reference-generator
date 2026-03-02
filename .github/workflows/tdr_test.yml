@@ -25,5 +25,6 @@ jobs:
       repo-name: da-reference-generator
       test-command: |
         sbt test
+      java-version: '17'  
     secrets:
       SLACK_WEBHOOK: ${{ secrets.TDR_SLACK_WEBHOOK }}
