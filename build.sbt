@@ -7,6 +7,7 @@ ThisBuild / scalaVersion := "2.13.18"
 lazy val root = (project in file("."))
   .settings(
     name := "da-reference-generator",
+    Test / classLoaderLayeringStrategy := ClassLoaderLayeringStrategy.Flat,
     libraryDependencies ++= Seq(
       awsSdkDynamoDbV2,
       awsSdkDynamoDbV1 % Test,
