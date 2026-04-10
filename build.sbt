@@ -10,7 +10,6 @@ lazy val root = (project in file("."))
     Test / classLoaderLayeringStrategy := ClassLoaderLayeringStrategy.Flat,
     libraryDependencies ++= Seq(
       awsSdkDynamoDbV2,
-      awsSdkDynamoDbV1 % Test,
       lambdaJavaCore,
       lambdaJavaEvents,
       scalaTest % Test,
@@ -23,7 +22,7 @@ lazy val root = (project in file("."))
       logstash,
       typesafe,
       testContainer % Test,
-      testContainerDynalite % Test
+      testContainerLocalstack % Test
     )
   )
 

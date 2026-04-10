@@ -2,7 +2,7 @@ package uk.gov.nationalarchives
 
 import com.amazonaws.services.lambda.runtime.events.{APIGatewayProxyRequestEvent, APIGatewayProxyResponseEvent}
 import com.amazonaws.services.lambda.runtime.{ClientContext, CognitoIdentity, Context, LambdaLogger}
-import com.dimafeng.testcontainers.DynaliteContainer
+import com.dimafeng.testcontainers.LocalStackV2Container
 import com.typesafe.config.{Config, ConfigFactory, ConfigValueFactory}
 import org.scalatest.flatspec.AnyFlatSpec
 import org.scalatest.matchers.should.Matchers
@@ -30,7 +30,7 @@ class LambdaTest extends AnyFlatSpec with Matchers with TestContainerUtils {
     override def getLogger: LambdaLogger = ???
   }
 
-  "The Lambda class" should "return an APIGateWayResponseEvent with the correct number of references" in withContainers { case container: DynaliteContainer =>
+  "The Lambda class" should "return an APIGateWayResponseEvent with the correct number of references" in withContainers { case container: LocalStackV2Container =>
     val client = createDynamoDbClient(container)
     val input = Lambda.Input(numberOfReferences = 3)
 
@@ -42,7 +42,7 @@ class LambdaTest extends AnyFlatSpec with Matchers with TestContainerUtils {
     actual shouldBe expected
   }
 
-  "The Lambda class" should "return an APIGateWayResponseEvent with body containing exception message if dynamoDB calls fail" in withContainers { case container: DynaliteContainer =>
+  "The Lambda class" should "return an APIGateWayResponseEvent with body containing exception message if dynamoDB calls fail" in withContainers { case container: LocalStackV2Container =>
     val client = createDynamoDbClient(container)
     val input = Lambda.Input(numberOfReferences = 3)
     val config = ConfigFactory
@@ -53,7 +53,7 @@ class LambdaTest extends AnyFlatSpec with Matchers with TestContainerUtils {
     val actual: APIGatewayProxyResponseEvent = lambda.process(input, client, config)
     val expected: APIGatewayProxyResponseEvent = new APIGatewayProxyResponseEvent()
       .withStatusCode(500)
-      .withBody("The provided key element does not match the schema")
+      .withBody("One of the required keys was not given a value")
     actual.getStatusCode shouldBe expected.getStatusCode
     actual.getBody should include(expected.getBody)
   }
