@@ -10,7 +10,6 @@ lazy val root = (project in file("."))
     Test / classLoaderLayeringStrategy := ClassLoaderLayeringStrategy.Flat,
     libraryDependencies ++= Seq(
       awsSdkDynamoDbV2,
-      awsSdkDynamoDbV1 % Test,
       lambdaJavaCore,
       lambdaJavaEvents,
       scalaTest % Test,
@@ -23,11 +22,11 @@ lazy val root = (project in file("."))
       logstash,
       typesafe,
       testContainer % Test,
-      testContainerDynalite % Test
+      testContainerLocalstack % Test
     )
   )
 
-dependencyOverrides += "commons-logging" % "commons-logging" % "1.3.5"
+dependencyOverrides += "commons-logging" % "commons-logging" % "1.3.6"
 
 (assembly / assemblyJarName) := "reference-generator.jar"
 

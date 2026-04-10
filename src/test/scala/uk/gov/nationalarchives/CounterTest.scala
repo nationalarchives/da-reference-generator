@@ -1,6 +1,6 @@
 package uk.gov.nationalarchives
 
-import com.dimafeng.testcontainers.DynaliteContainer
+import com.dimafeng.testcontainers.LocalStackV2Container
 import com.typesafe.config.{Config, ConfigFactory, ConfigValueFactory}
 import org.scalatest.flatspec.AnyFlatSpec
 import org.scalatest.matchers.should.Matchers
@@ -18,7 +18,7 @@ class CounterTest extends AnyFlatSpec with Matchers with TestContainerUtils {
 
   override def afterContainersStart(containers: containerDef.Container): Unit = super.afterContainersStart(containers)
 
-  "incrementCounter" should "return an exception if no items are found for the key" in withContainers { case container: DynaliteContainer =>
+  "incrementCounter" should "return an exception if no items are found for the key" in withContainers { case container: LocalStackV2Container =>
     val client = createDynamoDbClient(container)
     val config = ConfigFactory
       .load()
@@ -29,10 +29,10 @@ class CounterTest extends AnyFlatSpec with Matchers with TestContainerUtils {
 
     response shouldBe a[Failure[_]]
     response.failed.get shouldBe an[Exception]
-    response.failed.get.getMessage should include("The provided key element does not match the schema")
+    response.failed.get.getMessage should include("One of the required keys was not given a value")
   }
 
-  "incrementCounter" should "return an exception if the increment is a negative number" in withContainers { case container: DynaliteContainer =>
+  "incrementCounter" should "return an exception if the increment is a negative number" in withContainers { case container: LocalStackV2Container =>
     val client = createDynamoDbClient(container)
     val counter = new Counter(client, config)
     val response = counter.incrementCounter(-1)
@@ -42,7 +42,7 @@ class CounterTest extends AnyFlatSpec with Matchers with TestContainerUtils {
     response.failed.get.getMessage should include("The conditional request failed")
   }
 
-  "incrementCounter" should "return an exception if the increment is 0" in withContainers { case container: DynaliteContainer =>
+  "incrementCounter" should "return an exception if the increment is 0" in withContainers { case container: LocalStackV2Container =>
     val client = createDynamoDbClient(container)
     val counter = new Counter(client, config)
     val response = counter.incrementCounter(0)
@@ -52,7 +52,7 @@ class CounterTest extends AnyFlatSpec with Matchers with TestContainerUtils {
     response.failed.get.getMessage should include("The conditional request failed")
   }
 
-  "incrementCounter" should "return the current counter if the calls to getItem and updateItem succeeds" in withContainers { case container: DynaliteContainer =>
+  "incrementCounter" should "return the current counter if the calls to getItem and updateItem succeeds" in withContainers { case container: LocalStackV2Container =>
     val client = createDynamoDbClient(container)
     val counter = new Counter(client, config)
 
@@ -61,7 +61,7 @@ class CounterTest extends AnyFlatSpec with Matchers with TestContainerUtils {
     response shouldBe Success("10")
   }
 
-  "incrementCounter" should "return an exception if current counter does not match the retrieved counter value" in withContainers { case container: DynaliteContainer =>
+  "incrementCounter" should "return an exception if current counter does not match the retrieved counter value" in withContainers { case container: LocalStackV2Container =>
     val client = createDynamoDbClient(container)
     val counter = new Counter(client, config)
 
@@ -77,7 +77,7 @@ class CounterTest extends AnyFlatSpec with Matchers with TestContainerUtils {
     results._2.head.failed.get.getMessage should include("The conditional request failed")
   }
 
-  "incrementCounter" should "return an exception if the maximum retries have been exhausted" in withContainers { case container: DynaliteContainer =>
+  "incrementCounter" should "return an exception if the maximum retries have been exhausted" in withContainers { case container: LocalStackV2Container =>
     val client = createDynamoDbClient(container)
     val counter = new Counter(client, config)
     val response = counter.incrementCounter(-1)
