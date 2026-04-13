@@ -1,13 +1,10 @@
 package uk.gov.nationalarchives.utils
 
 import com.dimafeng.testcontainers.scalatest.TestContainerForAll
-import com.dimafeng.testcontainers.{ContainerDef, DynaliteContainer}
+import com.dimafeng.testcontainers.{ContainerDef, LocalStackV2Container}
 import com.typesafe.config.Config
 import org.scalatest.BeforeAndAfterEach
 import org.scalatest.flatspec.AnyFlatSpec
-import org.testcontainers.utility.DockerImageName
-import software.amazon.awssdk.auth.credentials.{AwsBasicCredentials, StaticCredentialsProvider}
-import software.amazon.awssdk.regions.Region
 import software.amazon.awssdk.services.dynamodb.DynamoDbClient
 import software.amazon.awssdk.services.dynamodb.model._
 import software.amazon.awssdk.services.dynamodb.waiters.DynamoDbWaiter
@@ -47,27 +44,25 @@ trait TestContainerUtils extends AnyFlatSpec with TestContainerForAll with Befor
 
   def config: Config
 
-  override val containerDef: ContainerDef = DynaliteContainer.Def(
-    dockerImageName = DockerImageName.parse("tenzer/dynalite").asCompatibleSubstituteFor("quay.io/testcontainers/dynalite")
-  )
+  override val containerDef: ContainerDef = LocalStackV2Container.Def()
 
   override def afterContainersStart(containers: containerDef.Container): Unit = {
     super.afterContainersStart(containers)
     containers match {
-      case container: DynaliteContainer => createTable(container)
+      case container: LocalStackV2Container => createTable(container)
     }
   }
 
-  protected def createDynamoDbClient(container: DynaliteContainer): DynamoDbClient = {
-    val credentials = StaticCredentialsProvider.create(AwsBasicCredentials.create("accessKeyId", "secretAccessKey"))
+  protected def createDynamoDbClient(container: LocalStackV2Container): DynamoDbClient = {
+    val endpoint = URI.create(s"http://${container.container.getHost}:${container.container.getMappedPort(4566)}")
     DynamoDbClient.builder()
-      .credentialsProvider(credentials)
-      .region(Region.EU_WEST_2)
-      .endpointOverride(URI.create(container.endpointConfiguration.getServiceEndpoint))
+      .credentialsProvider(container.staticCredentialsProvider)
+      .region(container.region)
+      .endpointOverride(endpoint)
       .build()
   }
 
-  private def createTable(container: DynaliteContainer): Unit = {
+  private def createTable(container: LocalStackV2Container): Unit = {
     val client: DynamoDbClient = createDynamoDbClient(container)
 
     client.createTable(createTableRequest)

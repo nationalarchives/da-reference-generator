@@ -7,9 +7,9 @@ ThisBuild / scalaVersion := "2.13.18"
 lazy val root = (project in file("."))
   .settings(
     name := "da-reference-generator",
+    Test / classLoaderLayeringStrategy := ClassLoaderLayeringStrategy.Flat,
     libraryDependencies ++= Seq(
       awsSdkDynamoDbV2,
-      awsSdkDynamoDbV1 % Test,
       lambdaJavaCore,
       lambdaJavaEvents,
       scalaTest % Test,
@@ -22,11 +22,11 @@ lazy val root = (project in file("."))
       logstash,
       typesafe,
       testContainer % Test,
-      testContainerDynalite % Test
+      testContainerLocalstack % Test
     )
   )
 
-dependencyOverrides += "commons-logging" % "commons-logging" % "1.3.5"
+dependencyOverrides += "commons-logging" % "commons-logging" % "1.3.6"
 
 (assembly / assemblyJarName) := "reference-generator.jar"
 
