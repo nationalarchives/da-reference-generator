@@ -11,3 +11,9 @@ updates:
       github-actions:
         patterns:
           - "*"
+  - package-ecosystem: "git-submodule"
+    directory: "/"
+    schedule:
+      interval: "weekly"
+    ignore:
+      - dependency-name: "*"
