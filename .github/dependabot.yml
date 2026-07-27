@@ -4,6 +4,8 @@ updates:
     directory: "/"
     schedule:
       interval: "weekly"
+    cooldown:
+      default-days: 30
     commit-message:
       prefix: "chore"
       include: "scope"
@@ -11,3 +13,11 @@ updates:
       github-actions:
         patterns:
           - "*"
+  - package-ecosystem: "gitsubmodule"
+    directory: "/"
+    schedule:
+      interval: "weekly"
+    cooldown:
+      default-days: 30
+    ignore:
+      - dependency-name: "*"
