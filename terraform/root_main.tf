@@ -96,14 +96,18 @@ module "reference_generator_api_gateway" {
 
 locals {
   allowed_vpces_tdr = {
+    dev = [
+      "${module.terraform_config_hosting_project.terraform_config["api_gateway_execute_dev_vpce"]}"
+    ]
     intg = [
-      "${module.shared_configurations_talend.config.dev.api_gateway_vpce}",
-      "${module.shared_configurations_talend.config.intg.api_gateway_vpce}",
       "${module.terraform_config_hosting_project.terraform_config["api_gateway_execute_intg_vpce"]}"
     ]
-    staging = ["${module.shared_configurations_talend.config.staging.api_gateway_vpce}"]
-    prod    = []
-    dev     = []
+    staging = [
+      "${module.terraform_config_hosting_project.terraform_config["api_gateway_execute_staging_vpce"]}"
+    ]
+    prod = [
+      "${module.terraform_config_hosting_project.terraform_config["api_gateway_execute_prod_vpce"]}"
+    ]
   }
 }
 
