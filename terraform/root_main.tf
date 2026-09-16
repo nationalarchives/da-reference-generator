@@ -101,7 +101,7 @@ locals {
       "${module.shared_configurations_talend.config.intg.api_gateway_vpce}"
     ]
     staging = ["${module.shared_configurations_talend.config.staging.api_gateway_vpce}"]
-    prod    = ["${module.shared_configurations_talend.config.prod.api_gateway_vpce}"]
+    prod    = []
     dev     = []
   }
 }
@@ -112,7 +112,7 @@ moved {
 }
 
 module "reference_generator_api_gateway_private" {
-  count                  = local.hosting_environment != "prod" ? 1 : 0
+  count                  = 1
   source                 = "./da-terraform-modules/apigateway"
   endpoint_configuration = { "types" : ["PRIVATE"] }
   api_definition = templatefile("./templates/api_gateway/reference_generator.json.tpl", {
