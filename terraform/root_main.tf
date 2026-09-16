@@ -144,7 +144,7 @@ module "reference_generator_api_gateway_private" {
 # The da-terraform-modules/lambda can only accept a map so duplicate principal names are not possible
 # Add the permission just for the private API
 resource "aws_lambda_permission" "lambda_permissions" {
-  count         = local.hosting_environment != "prod" ? 1 : 0
+  count         = 1
   statement_id  = "AllowExecutionFromApigatewayPrivate"
   action        = "lambda:InvokeFunction"
   function_name = module.reference_generator_lambda.lambda_function.function_name
