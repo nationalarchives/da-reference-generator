@@ -96,13 +96,18 @@ module "reference_generator_api_gateway" {
 
 locals {
   allowed_vpces_tdr = {
-    intg = [
-      "${module.shared_configurations_talend.config.dev.api_gateway_vpce}",
-      "${module.shared_configurations_talend.config.intg.api_gateway_vpce}"
+    dev = [
+      "${module.terraform_config_hosting_project.terraform_config["api_gateway_execute_dev_vpce"]}"
     ]
-    staging = ["${module.shared_configurations_talend.config.staging.api_gateway_vpce}"]
-    prod    = []
-    dev     = []
+    intg = [
+      "${module.terraform_config_hosting_project.terraform_config["api_gateway_execute_intg_vpce"]}"
+    ]
+    staging = [
+      "${module.terraform_config_hosting_project.terraform_config["api_gateway_execute_staging_vpce"]}"
+    ]
+    prod = [
+      "${module.terraform_config_hosting_project.terraform_config["api_gateway_execute_prod_vpce"]}"
+    ]
   }
 }
 
@@ -114,7 +119,7 @@ moved {
 module "reference_generator_api_gateway_private" {
   count                  = 1
   source                 = "./da-terraform-modules/apigateway"
-  endpoint_configuration = { "types" : ["PRIVATE"] }
+  endpoint_configuration = { "types" : ["PRIVATE"], "vpc_endpoint_ids" : [module.terraform_config_hosting_project.terraform_config["api_gateway_execute_${local.hosting_environment}_vpce"]] }
   api_definition = templatefile("./templates/api_gateway/reference_generator.json.tpl", {
     environment = local.hosting_environment
     title       = format("%s-%s", local.reference_generator_api_gateway_name, "private")
@@ -139,7 +144,7 @@ module "reference_generator_api_gateway_private" {
 # The da-terraform-modules/lambda can only accept a map so duplicate principal names are not possible
 # Add the permission just for the private API
 resource "aws_lambda_permission" "lambda_permissions" {
-  count         = local.hosting_environment != "prod" ? 1 : 0
+  count         = 1
   statement_id  = "AllowExecutionFromApigatewayPrivate"
   action        = "lambda:InvokeFunction"
   function_name = module.reference_generator_lambda.lambda_function.function_name
