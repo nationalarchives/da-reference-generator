@@ -67,31 +67,6 @@ module "reference_generator_lambda" {
   timeout_seconds = 60
   memory_size     = 1024
   tags            = local.hosting_common_tags
-  lambda_invoke_permissions = {
-    "apigateway.amazonaws.com" = "${module.reference_generator_api_gateway.api_execution_arn}/*/GET/counter"
-  }
-}
-
-module "reference_generator_api_gateway" {
-  source = "./da-terraform-modules/apigateway"
-  api_definition = templatefile("./templates/api_gateway/reference_generator.json.tpl", {
-    environment = local.hosting_environment
-    title       = local.reference_generator_api_gateway_name
-    lambda_arn  = module.reference_generator_lambda.lambda_arn,
-  })
-  api_name    = local.reference_generator_api_gateway_name
-  environment = local.hosting_environment
-  common_tags = local.hosting_common_tags
-  api_rest_policy = templatefile("${path.module}/templates/api_gateway/reference_generator_rest_policy.json.tpl", {
-    api_gateway_arn   = module.reference_generator_api_gateway.api_execution_arn
-    tdr_vpc_public_ip = jsonencode(local.tdr_vpc_public_ip)
-  })
-  api_method_settings = [{
-    method_path        = "*/*"
-    logging_level      = "INFO",
-    metrics_enabled    = false,
-    data_trace_enabled = false
-  }]
 }
 
 locals {
@@ -109,11 +84,6 @@ locals {
       "${module.terraform_config_hosting_project.terraform_config["api_gateway_execute_prod_vpce"]}"
     ]
   }
-}
-
-moved {
-  from = module.reference_generator_api_gateway_private
-  to   = module.reference_generator_api_gateway_private[0]
 }
 
 module "reference_generator_api_gateway_private" {
