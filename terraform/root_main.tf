@@ -72,7 +72,6 @@ module "reference_generator_lambda" {
   tags            = local.hosting_common_tags
 }
 
-
 moved {
   from = module.reference_generator_api_gateway
   to   = module.reference_generator_api_gateway[0]
