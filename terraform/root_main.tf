@@ -78,7 +78,7 @@ moved {
 }
 
 module "reference_generator_api_gateway" {
-  count  = local.hosting_environment == "staging" || local.hosting_environment == "prod" ? 1 : 0
+  count  = local.hosting_environment == "prod" ? 1 : 0
   source = "./da-terraform-modules/apigateway"
   api_definition = templatefile("./templates/api_gateway/reference_generator.json.tpl", {
     environment = local.hosting_environment
@@ -148,7 +148,7 @@ module "reference_generator_api_gateway_private" {
 }
 
 resource "aws_lambda_permission" "lambda_permissions_public" {
-  count         = local.hosting_environment == "staging" || local.hosting_environment == "prod" ? 1 : 0
+  count         = local.hosting_environment == "prod" ? 1 : 0
   statement_id  = "AllowExecutionFromApigatewayPublic"
   action        = "lambda:InvokeFunction"
   function_name = module.reference_generator_lambda.lambda_function.function_name
