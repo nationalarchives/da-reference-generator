@@ -1,3 +1,6 @@
+# Always deploy the lambda
+# The API public and private Gateway deployment are both optional
+
 module "terraform_config_hosting_project" {
   source  = "./da-terraform-configurations/"
   project = var.hosting_project
@@ -67,12 +70,15 @@ module "reference_generator_lambda" {
   timeout_seconds = 60
   memory_size     = 1024
   tags            = local.hosting_common_tags
-  lambda_invoke_permissions = {
-    "apigateway.amazonaws.com" = "${module.reference_generator_api_gateway.api_execution_arn}/*/GET/counter"
-  }
+}
+
+moved {
+  from = module.reference_generator_api_gateway
+  to   = module.reference_generator_api_gateway[0]
 }
 
 module "reference_generator_api_gateway" {
+  count  = local.hosting_environment == "staging" || local.hosting_environment == "prod" ? 1 : 0
   source = "./da-terraform-modules/apigateway"
   api_definition = templatefile("./templates/api_gateway/reference_generator.json.tpl", {
     environment = local.hosting_environment
@@ -83,7 +89,7 @@ module "reference_generator_api_gateway" {
   environment = local.hosting_environment
   common_tags = local.hosting_common_tags
   api_rest_policy = templatefile("${path.module}/templates/api_gateway/reference_generator_rest_policy.json.tpl", {
-    api_gateway_arn   = module.reference_generator_api_gateway.api_execution_arn
+    api_gateway_arn   = module.reference_generator_api_gateway[0].api_execution_arn
     tdr_vpc_public_ip = jsonencode(local.tdr_vpc_public_ip)
   })
   api_method_settings = [{
@@ -141,8 +147,15 @@ module "reference_generator_api_gateway_private" {
   }]
 }
 
-# The da-terraform-modules/lambda can only accept a map so duplicate principal names are not possible
-# Add the permission just for the private API
+resource "aws_lambda_permission" "lambda_permissions_public" {
+  count         = local.hosting_environment == "staging" || local.hosting_environment == "prod" ? 1 : 0
+  statement_id  = "AllowExecutionFromApigatewayPublic"
+  action        = "lambda:InvokeFunction"
+  function_name = module.reference_generator_lambda.lambda_function.function_name
+  principal     = "apigateway.amazonaws.com"
+  source_arn    = "${module.reference_generator_api_gateway[0].api_execution_arn}/*/GET/counter"
+}
+
 resource "aws_lambda_permission" "lambda_permissions" {
   count         = 1
   statement_id  = "AllowExecutionFromApigatewayPrivate"
