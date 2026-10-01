@@ -4,7 +4,7 @@ object Dependencies {
 
   private val circeVersion = "0.14.16"
   private val testContainersVersion = "0.44.1"
-  private val nettyVersion = "4.1.137.Final"
+  private val nettyVersion = "4.1.138.Final"
 
   lazy val nettyOverrides: Seq[ModuleID] = Seq(
     "netty-buffer",
