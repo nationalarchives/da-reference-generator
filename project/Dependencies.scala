@@ -2,9 +2,9 @@ import sbt._
 
 object Dependencies {
 
-  private val circeVersion = "0.14.16"
+  private val circeVersion = "0.14.17"
   private val testContainersVersion = "0.44.1"
-  private val nettyVersion = "4.2.18.Final"
+  private val nettyVersion = "4.2.19.Final"
 
   lazy val nettyOverrides: Seq[ModuleID] = Seq(
     "netty-buffer",
@@ -20,8 +20,8 @@ object Dependencies {
   ).map("io.netty" % _ % nettyVersion)
 
   lazy val scalaTest = "org.scalatest" %% "scalatest" % "3.2.20"
-  lazy val awsApacheClient = "software.amazon.awssdk" % "apache-client" % "2.55.11"
-  lazy val awsSdkDynamoDbV2 = "software.amazon.awssdk" % "dynamodb" % "2.55.11"
+  lazy val awsApacheClient = "software.amazon.awssdk" % "apache-client" % "2.55.12"
+  lazy val awsSdkDynamoDbV2 = "software.amazon.awssdk" % "dynamodb" % "2.55.12"
   lazy val lambdaJavaCore = "com.amazonaws" % "aws-lambda-java-core" % "1.4.0"
   lazy val lambdaJavaEvents = "com.amazonaws" % "aws-lambda-java-events" % "3.16.1"
   lazy val ocitools = "uk.gov.nationalarchives.oci" % "oci-tools-scala_2.13" % "0.4.0"
