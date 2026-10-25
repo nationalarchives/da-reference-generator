@@ -20,7 +20,7 @@ object Dependencies {
   ).map("io.netty" % _ % nettyVersion)
 
   lazy val scalaTest = "org.scalatest" %% "scalatest" % "3.2.20"
-  lazy val awsApacheClient = "software.amazon.awssdk" % "apache-client" % "2.57.2"
+  lazy val awsApacheClient = "software.amazon.awssdk" % "apache-client" % "2.57.3"
   lazy val awsSdkDynamoDbV2 = "software.amazon.awssdk" % "dynamodb" % "2.57.2"
   lazy val lambdaJavaCore = "com.amazonaws" % "aws-lambda-java-core" % "1.4.1"
   lazy val lambdaJavaEvents = "com.amazonaws" % "aws-lambda-java-events" % "3.16.1"
