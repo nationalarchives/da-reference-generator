@@ -20,8 +20,8 @@ object Dependencies {
   ).map("io.netty" % _ % nettyVersion)
 
   lazy val scalaTest = "org.scalatest" %% "scalatest" % "3.2.20"
-  lazy val awsApacheClient = "software.amazon.awssdk" % "apache-client" % "2.59.4"
-  lazy val awsSdkDynamoDbV2 = "software.amazon.awssdk" % "dynamodb" % "2.59.4"
+  lazy val awsApacheClient = "software.amazon.awssdk" % "apache-client" % "2.59.7"
+  lazy val awsSdkDynamoDbV2 = "software.amazon.awssdk" % "dynamodb" % "2.59.7"
   lazy val lambdaJavaCore = "com.amazonaws" % "aws-lambda-java-core" % "1.4.1"
   lazy val lambdaJavaEvents = "com.amazonaws" % "aws-lambda-java-events" % "3.16.1"
   lazy val ocitools = "uk.gov.nationalarchives.oci" % "oci-tools-scala_2.13" % "0.4.0"
@@ -29,7 +29,7 @@ object Dependencies {
   lazy val circeGeneric = "io.circe" %% "circe-generic" % circeVersion
   lazy val circeParser = "io.circe" %% "circe-parser" % circeVersion
   lazy val scalaLogging = "com.typesafe.scala-logging" %% "scala-logging" % "3.9.6"
-  lazy val logback = "ch.qos.logback" % "logback-classic" % "1.6.7"
+  lazy val logback = "ch.qos.logback" % "logback-classic" % "1.6.8"
   lazy val logstash = "net.logstash.logback" % "logstash-logback-encoder" % "9.0"
   lazy val typesafe = "com.typesafe" % "config" % "1.4.10"
   lazy val testContainer = "com.dimafeng" %% "testcontainers-scala-scalatest" % testContainersVersion
